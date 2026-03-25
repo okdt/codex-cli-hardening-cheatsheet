@@ -1,0 +1,58 @@
+# Safe shared defaults for Codex CLI.
+# Codex CLI 向けの、安全寄りな共通デフォルト。
+#
+# Design goals:
+# 設計方針:
+# - keep writes limited to the workspace
+# - 書き込みをワークスペース内に限定する
+# - require approval for impactful actions
+# - 影響の大きい操作は承認必須にする
+# - disable network unless explicitly enabled via profile
+# - ネットワークは profile で明示しない限り無効にする
+# - keep local history for usability, but know the tradeoff
+# - ローカル履歴は利便性のため保存しつつ、トレードオフを理解する
+
+model = "gpt-5.4"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+allow_login_shell = false
+model_reasoning_effort = "medium"
+
+# Persist local session history for day-to-day usability.
+# 日常利用のため、ローカルのセッション履歴は保存する。
+# If you prefer not to retain history, change this to "none".
+# 履歴を残したくない場合は、ここを "none" に変更する。
+[history]
+persistence = "save-all"
+
+# Workspace-write sandbox with no extra writable paths and no network.
+# 追加の書き込み先を認めず、ネットワークも無効な workspace-write。
+[sandbox_workspace_write]
+network_access = false
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+writable_roots = []
+
+# Quiet inspection mode: no writes, no approvals, minimal risk.
+# 閲覧専用モード。書き込みなし、承認なし、リスク最小。
+[profiles.readonly_quiet]
+approval_policy = "never"
+sandbox_mode = "read-only"
+
+# Default editing mode: local workspace edits allowed with approval prompts.
+# 通常の編集モード。ワークスペース内の編集を承認付きで許可する。
+[profiles.local_write]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# Same as local_write, but opt in to network only when explicitly selected.
+# local_write と同じだが、明示時のみネットワークを有効にする。
+[profiles.net_enabled]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.net_enabled.sandbox_workspace_write]
+network_access = true
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+writable_roots = []

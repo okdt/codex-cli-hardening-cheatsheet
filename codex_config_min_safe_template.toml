@@ -1,0 +1,61 @@
+# Minimal safety-first template for Codex CLI.
+# Save as ~/.codex/config.toml for your user default.
+# Then use profiles or CLI flags to temporarily relax settings.
+
+# Pick the model name your current CLI accepts.
+# In current OpenAI docs, gpt-5.4 is a safe general default.
+model = "gpt-5.4"
+
+# Interactive local work: ask when the action crosses a trust boundary.
+approval_policy = "on-request"
+
+# Allow editing inside the workspace without removing the sandbox entirely.
+sandbox_mode = "workspace-write"
+
+# Hardening option: avoid inheriting login-shell startup behavior.
+allow_login_shell = false
+
+[history]
+# Persist session transcripts for day-to-day usability.
+# If prompts or work context may contain sensitive data, switch this to "none".
+persistence = "save-all"
+
+[sandbox_workspace_write]
+# Keep outbound network disabled unless explicitly needed.
+network_access = false
+
+# Do not widen writable scope to temporary directories by default.
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+
+# Additional writable directories.
+# Keep empty and add only when a real workflow requires it.
+writable_roots = []
+
+[profiles.readonly_quiet]
+# Read-only inspection mode.
+# Useful for unfamiliar repositories, reviews, and reconnaissance.
+approval_policy = "never"
+sandbox_mode = "read-only"
+
+[profiles.local_write]
+# Standard profile for normal local edits.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.net_enabled]
+# Same editing posture as local_write, but with network access enabled.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.net_enabled.sandbox_workspace_write]
+network_access = true
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+writable_roots = []
+
+# Notes:
+# - Prefer `codex --add-dir /path/to/dir` over broadening defaults globally.
+# - Avoid `danger-full-access` as a shared baseline.
+# - Avoid mixing `approval_policy = "on-request"` with [approval_policy.granular]
+#   unless you rewrite approval_policy as an object/table form.
