@@ -280,7 +280,7 @@ endpoint = "https://otlp.example.com"
 
 ### 日常の使い分け
 
-テンプレートに profile を定義しておけば、用途に応じて切り替えられます。
+`config.toml` の中に `[profiles.名前]` セクションで複数の profile を定義しておけば、`--profile` オプションで切り替えられます。ベースの設定を profile の値で上書きする仕組みです。
 
 ```bash
 # 調査だけしたい
