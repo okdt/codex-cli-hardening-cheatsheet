@@ -153,6 +153,21 @@ approval_policy = "on-request"
 - high-risk action に human-in-the-loop を入れるという意味で、[OWASP の AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html) が推奨する方針とも一致します
 - `trust_level = "trusted"` は承認を省略できて便利ですが、信頼したコンテキストから injection が来た場合、そのまま通ります。安全性とのトレードオフを理解した上で使うこと
 
+**コマンド単位のルール（execpolicy / preview）:**
+
+`approval_policy` はセッション全体の姿勢を決めますが、コマンド単位で `allow` / `prompt` / `forbidden` を制御する仕組みも現在プレビューとして提供されています。Claude Code の deny/ask/allow ルールに相当するものです。`~/.codex/rules/*.rules` に Starlark（Python サブセット）で記述します。
+
+```starlark
+# ~/.codex/rules/default.rules
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "destructive operation",
+)
+```
+
+現時点ではシェルコマンドのプレフィックスマッチが対象で、Claude Code の `Read(**/.env)` のようなファイル操作単位のルールはありません。`config.toml` で `approval_policy` を granular にし `rules = true` にすると `prompt` ルールが有効になります。プレビュー扱いのため API に破壊的変更が入る可能性があります。詳細は [Rules / execpolicy](https://developers.openai.com/codex/rules) を参照してください。
+
 ### 3. ネットワーク制限
 
 ネットワークは sandbox 配下の設定ですが、独立した防御層として重要です。`workspace-write` でも、必要がなければ閉じておくのが基本です。ローカルの事故はローカルで済みますが、ネットワークが開いているとデータが外に出る可能性があります。
