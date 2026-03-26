@@ -130,24 +130,23 @@ Codex CLI は profile 単位で設定差分を持たせやすく、
 
 のように分けると、権限差と用途が一致しやすくなります。
 
-### 5. TOML の構造制約を踏まえる必要がある
+### 5. 設定ファイルが壊れると、制約も壊れる
 
-Codex CLI の設定は `config.toml` なので、TOML の構造制約そのものが設定ミス要因になります。
+Codex CLI の設定は `config.toml` です。TOML は JSON と違って人間が読み書きしやすい反面、構造の制約に引っかかると**パースエラーでファイルごと無視される**ことがあります。
 
-たとえば、次のような形はエラーになります。
+つまり、せっかく `sandbox_mode = "workspace-write"` や `network_access = false` を書いていても、別の箇所の構文エラーで設定ファイル全体が読み込まれず、結果的にデフォルト（＝制約なし）で動く——ということが起きえます。
+
+よくある落とし穴:
 
 ```toml
+# これはエラーになる
 approval_policy = "on-request"
 
 [approval_policy.granular]
 rules = true
 ```
 
-これは `approval_policy` を文字列として定義したあとに、
-同じキーをテーブルとして拡張しているためです。
-
-つまり、Codex の hardening では「安全な値を選ぶ」だけでなく、
-「壊れない TOML にする」ことも重要です。
+`approval_policy` を文字列として定義したあとに、同じキーをテーブルとして拡張しているためです。hardening では「安全な値を選ぶ」だけでなく、「設定が正しく読み込まれている」ことの確認も重要です。
 
 ### 6. `trusted` や login shell など、実務寄りの論点がある
 
@@ -459,19 +458,6 @@ persistence = "save-all"
 ```
 
 便利ですが、機密性の高い環境では `none` の方が適切なことがあります。セッション履歴にはプロンプト、差分説明、接続先、作業文脈が丸ごと残ります。共有端末や退職者のアカウント引き継ぎ時に、想像以上の情報が読めてしまうことがあります。
-
-### 4. `approval_policy` の TOML 衝突
-
-次はエラーになります。
-
-```toml
-approval_policy = "on-request"
-
-[approval_policy.granular]
-rules = true
-```
-
-理由は、`approval_policy` を文字列で定義したあとに、同じキーをテーブルとして拡張しているためです。最小安全テンプレートでは granular 設定を外す方が無難です。
 
 ## 導入の仕方
 
