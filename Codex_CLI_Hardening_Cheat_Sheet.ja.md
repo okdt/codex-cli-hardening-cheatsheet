@@ -118,6 +118,7 @@ exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
 writable_roots = []
 
+# 以下、切り替え用 profile
 [profiles.readonly_quiet]
 approval_policy = "never"
 sandbox_mode = "read-only"
