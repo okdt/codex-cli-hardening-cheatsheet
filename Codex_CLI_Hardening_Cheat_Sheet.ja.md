@@ -140,7 +140,7 @@ exclude_tmpdir_env_var = true
 writable_roots = []
 ```
 
-## 一般的なハードニングのコツ
+## ハードニングしよう
 
 ### 1. デフォルトは狭く、必要時だけ広げる
 
