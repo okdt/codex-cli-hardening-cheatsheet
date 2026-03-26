@@ -102,63 +102,6 @@ Codex CLI では次の設定がこの考え方に対応します。
 - `full_auto` のような誤解を招きやすい名前を避ける
 - 共通テンプレートは単純に保ち、例外は profile や一時オプションで与える
 
-## Codex CLI 特有のポイント
-
-Claude Code など他の coding agent と共通する原則もありますが、Codex CLI には設定モデル上の特徴があります。
-この違いを押さえておくと、なぜこのチートシートがこの形になっているか理解しやすくなります。
-
-### 1. `sandbox_mode` と `approval_policy` が中心になる
-
-Codex CLI では、何をどこまで自動で実行させるかを、
-主に `sandbox_mode` と `approval_policy` の組み合わせで考えます。
-
-- `sandbox_mode`: どこまで書き込みや実行を許すか（行動の範囲）
-- `approval_policy`: どこで人間の承認を挟むか（判断の挿入点）
-
-Claude Code の `settings.json` が deny/ask/allow のルールリストで制御するのに対し、Codex CLI はこの 2 軸の組み合わせが安全設計の土台になります。
-
-### 2. `workspace-write` を基準にしやすい
-
-Codex CLI では `read-only` / `workspace-write` / `danger-full-access` の 3 段階があり、その差が大きいのが特徴です。
-
-- `read-only`: 調査や確認向き。何も壊せない代わりに、何も直せない
-- `workspace-write`: 日常の編集向き。ワークスペース内は書けるが、外には出られない
-- `danger-full-access`: 名前の通り危険。ホームディレクトリもシステム設定も書ける
-
-`danger-full-access` から始めて絞るのではなく、`workspace-write` を基準にして、必要に応じて前後へ振る設計が分かりやすくなります。
-
-### 3. ネットワーク設定が sandbox 配下にぶら下がる
-
-Codex CLI では `network_access` が `sandbox_workspace_write` 配下で管理されます。
-このため、単に「ネットワークをオンにする」ではなく、どの sandbox 前提でネットワークを許すかを意識した設計になります。
-
-なぜこれが重要かというと、ネットワークが開いていると indirect prompt injection の影響範囲が一気に広がるからです。外部の README を読んだ結果「まずこの依存を追加しましょう」と誘導される——ネットワークが閉じていればそこで止まりますが、開いていればそのまま `npm install` まで走ります。
-
-このチートシートで `remote_enabled` profile を分けているのも、そのためです。
-
-### 4. profile による切り替えが運用しやすい
-
-Codex CLI は profile 単位で設定差分を持たせやすく、
-共通デフォルトを堅めにしつつ、用途ごとに切り替える運用と相性が良いです。
-
-たとえば:
-
-- `readonly_quiet`: 調査・確認向け
-- `local_write`: 通常のローカル編集向け
-- `remote_enabled`: 外部参照、依存取得、API 利用など、ローカル外の資源に触れる作業向け
-
-のように分けると、権限差と用途が一致しやすくなります。
-
-### 5. `trusted` や login shell など、実務寄りの論点がある
-
-Codex CLI には、単純な allow/deny だけではない運用論点があります。
-
-- `trust_level = "trusted"` は便利だが、安全性とトレードオフになる。信頼したコンテキストから injection が来た場合、そのまま通ります
-- `allow_login_shell = false` は、シェル初期化依存を減らして再現性を上げる。`.bashrc` や `.zshrc` に書かれたエイリアスや PATH 変更が意図せず AI の行動に影響するのを防ぎます
-- `history.persistence` は、利便性と情報残留のバランスが問われる。API キー断片、DB 接続文字列、社内 URL——セッション履歴には、後から見ると驚くほどの情報が残っています
-
-こうした点は、他ツールの一般論だけでは見えにくい、Codex CLI ならではの調整ポイントです。
-
 ## 結論
 
 共通デフォルトの出発点としては、次の方針が扱いやすいです。
@@ -360,6 +303,13 @@ persistence = "save-all"
 - 共有端末や業務環境では、誰がその履歴を読めるかを確認しておくこと
 - agent 的な運用（自動実行の繰り返し）では、履歴の蓄積自体が情報漏えい面になりうる
 - 長期的には persistence attack（過去の文脈を利用した攻撃）の扱いも意識したい
+
+### その他の実務寄りの設定
+
+sandbox / approval / network / history の 4 軸以外にも、Codex CLI ならではの調整ポイントがあります。
+
+- **`trust_level = "trusted"`** は便利だが、安全性とトレードオフになる。信頼したコンテキストから injection が来た場合、そのまま通ります
+- **`allow_login_shell = false`** は、シェル初期化依存を減らして再現性を上げる。`.bashrc` や `.zshrc` に書かれたエイリアスや PATH 変更が意図せず AI の行動に影響するのを防ぎます
 
 ## 有効な実装例
 
