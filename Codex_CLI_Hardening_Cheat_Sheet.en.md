@@ -21,12 +21,6 @@ Codex CLI can read and write files, run shell commands, change settings, and in 
 
 This cheatsheet is meant to reduce those risks without making everyday development unnecessarily painful.
 
-Relevant external references:
-
-- OWASP GenAI Security Project: https://genai.owasp.org/
-- OWASP Prompt Injection: https://owasp.org/www-community/attacks/PromptInjection
-- OWASP LLM Prompt Injection Prevention Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html
-
 ## Goals
 
 - Translate general hardening practices into Codex CLI operations
@@ -504,7 +498,7 @@ Commented templates:
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
 - [codex-config.hardened.template.toml](./codex-config.hardened.template.toml)
 
-## References
+## Official Documentation
 
 - [Sandboxing](https://developers.openai.com/codex/concepts/sandboxing)
 - [Agent approvals & security](https://developers.openai.com/codex/agent-approvals-security)
@@ -512,6 +506,9 @@ Commented templates:
 - [Config basics](https://developers.openai.com/codex/config-basic)
 - [Configuration reference](https://developers.openai.com/codex/config-reference)
 - [Rules / execpolicy](https://developers.openai.com/codex/rules)
+
+## Additional References
+
 - [OWASP GenAI Security Project](https://genai.owasp.org/)
 - [OWASP Prompt Injection](https://owasp.org/www-community/attacks/PromptInjection)
 - [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
