@@ -24,7 +24,7 @@ This is not official OpenAI documentation. Before applying any settings in produ
 
 This repository is meant to work for a range of readers, from people who want a safer shared default to people who want to tune Codex CLI around a specific project or operational model.
 
-Start by reviewing the baseline and templates. After that, it is often useful to feed the docs back into your own Codex setup and ask what should be adjusted for your actual workflow and risk profile.
+Start with the cheatsheet and the templates. After that, it is often useful to feed the docs back into your own Codex setup and ask what should be adjusted for your actual workflow and risk profile.
 
 For example:
 
