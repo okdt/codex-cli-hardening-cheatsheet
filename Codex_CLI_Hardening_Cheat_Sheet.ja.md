@@ -160,6 +160,7 @@ writable_roots = []
 - `writable_roots = []` は追加書き込み先を増やさない安全な初期値。ここにディレクトリを追加するほど、AI が書き込める範囲が広がります
 - `/tmp` や `$TMPDIR` を writable root に含めると、一時ファイル経由で sandbox 外にデータを受け渡す経路ができてしまいます
 - 追加ディレクトリが必要な時は `--add-dir /path/to/dir` で一時的に足す方が、設定を恒久的に広げるより安全です
+- `allow_login_shell = false` にしておくと、`.bashrc` や `.zshrc` に書かれたエイリアスや PATH 変更が意図せず AI の行動に影響するのを防げます。シェル初期化への依存を減らすことで再現性も上がります
 
 **注意:**
 
@@ -188,6 +189,7 @@ approval_policy = "on-request"
 - 毎回フル手動レビューほど重くない
 - 共通テンプレートに granular 設定まで入れなくてよい
 - high-risk action に human-in-the-loop を入れるという意味で、[OWASP の AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html) が推奨する方針とも一致します
+- `trust_level = "trusted"` は承認を省略できて便利ですが、信頼したコンテキストから injection が来た場合、そのまま通ります。安全性とのトレードオフを理解した上で使うこと
 
 ### 3. ネットワーク制限
 
@@ -264,13 +266,6 @@ endpoint = "https://otlp.example.com"
 
 - `~/.codex/log/` にファイルログが書き出される
 - `config.toml` の `log_dir` で変更可能
-
-### その他の実務寄りの設定
-
-sandbox / approval / network / history の 4 軸以外にも、Codex CLI ならではの調整ポイントがあります。
-
-- **`trust_level = "trusted"`** は便利だが、安全性とトレードオフになる。信頼したコンテキストから injection が来た場合、そのまま通ります
-- **`allow_login_shell = false`** は、シェル初期化依存を減らして再現性を上げる。`.bashrc` や `.zshrc` に書かれたエイリアスや PATH 変更が意図せず AI の行動に影響するのを防ぎます
 
 ## 導入の仕方
 
