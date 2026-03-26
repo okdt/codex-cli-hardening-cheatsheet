@@ -22,28 +22,6 @@ English: [README.en.md](./README.en.md)
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
   最小限の安全設定だけを抜き出した軽量テンプレート
 
-## Recommended Baseline
-
-まずは次のような単純な共通デフォルトから始めるのが扱いやすいです。
-
-```toml
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-network_access = false
-
-[history]
-persistence = "save-all"
-```
-
-このベースラインは次の意図を持っています。
-
-- 影響の大きい操作は承認付きにする
-- 書き込みはワークスペース内に留める
-- ネットワークは既定で無効にする
-- ローカル履歴は利便性のため保存し、必要なら `none` を選べるようにする
-
 ## How To Use
 
 このドキュメントは、まず安全な共通デフォルトを知りたい初学者から、
@@ -80,11 +58,11 @@ persistence = "save-all"
 
 ## Notes
 
-- 設定キーや挙動は Codex CLI のバージョンによって変わる可能性があります
-- 共通テンプレートは、まず単純で説明しやすいことを優先しています
-- `granular` のような細分化設定は、運用要件が固まってから追加する方が安全です
 - Cheatsheet 本体では、OWASP の GenAI / prompt injection 関連資料を、どの観点で読むと Codex CLI の設定判断に役立つか分かるように整理しています
 - また、`Human-In-The-Loop`、最小権限の原則、多層防御といったセキュア設計の基本原則もあわせて解説しています
+- 共通テンプレートは、まず単純で説明しやすいことを優先しています
+- `granular` のような細分化設定は、運用要件が固まってから追加する方が安全です
+- 設定キーや挙動は Codex CLI のバージョンによって変わる可能性があります
 
 ## References
 
