@@ -52,7 +52,7 @@ For example:
 
 - explain which changes would improve safety first for a beginner
 - suggest how far to tighten the defaults for solo development
-- explain how `readonly_quiet`, `local_write`, and `net_enabled` should be used in practice
+- explain how `readonly_quiet`, `local_write`, and `remote_enabled` should be used in practice
 - evaluate whether `network_access` should stay disabled by default for this project
 - propose how to separate shared defaults from explicit exceptions for team use
 

@@ -45,13 +45,13 @@ sandbox_mode = "read-only"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-# Same as local_write, but opt in to network only when explicitly selected.
-# local_write と同じだが、明示時のみネットワークを有効にする。
-[profiles.net_enabled]
+# Same as local_write, but for work that touches resources beyond the local machine.
+# local_write と同じだが、ローカル外の資源に触れる作業向け。
+[profiles.remote_enabled]
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled.sandbox_workspace_write]
+[profiles.remote_enabled.sandbox_workspace_write]
 network_access = true
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true

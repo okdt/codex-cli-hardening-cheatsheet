@@ -58,7 +58,7 @@ persistence = "save-all"
 
 - まず何を変えれば安全性が上がるか、初学者向けに整理して
 - 個人開発向けなら、どこまで安全側に倒すべきか提案して
-- `readonly_quiet` / `local_write` / `net_enabled` をどう使い分けるべきか整理して
+- `readonly_quiet` / `local_write` / `remote_enabled` をどう使い分けるべきか整理して
 - このプロジェクトでは `network_access` を既定で無効にすべきか検討して
 - チーム運用を前提に、共通テンプレートと例外ルールの分け方を提案して
 
