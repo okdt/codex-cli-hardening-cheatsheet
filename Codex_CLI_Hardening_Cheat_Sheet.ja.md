@@ -166,7 +166,7 @@ prefix_rule(
 )
 ```
 
-現時点ではシェルコマンドのプレフィックスマッチが対象で、Claude Code の `Read(**/.env)` のようなファイル操作単位のルールはありません。`config.toml` で `approval_policy` を granular にし `rules = true` にすると `prompt` ルールが有効になります。プレビュー扱いのため API に破壊的変更が入る可能性があります。詳細は [Rules / execpolicy](https://developers.openai.com/codex/rules) を参照してください。
+現時点ではシェルコマンドのプレフィックスマッチが対象で、Claude Code の `Read(**/.env)` のようなファイル操作単位のルールはありません。`config.toml` で `approval_policy` を granular にし `rules = true` にすると `prompt` ルールが有効になります。現時点では[プレビュー扱い](https://github.com/openai/codex/blob/main/codex-rs/execpolicy/README.md)のため、API に破壊的変更が入る可能性があります。詳細は [Rules / execpolicy](https://developers.openai.com/codex/rules) を参照してください。
 
 ### 3. ネットワーク制限
 
