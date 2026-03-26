@@ -140,19 +140,6 @@ exclude_tmpdir_env_var = true
 writable_roots = []
 ```
 
-### 日常の使い分け
-
-```bash
-# 調査だけしたい
-codex --profile readonly_quiet
-
-# 通常のローカル編集
-codex --profile local_write
-
-# ネットワークが必要な時だけ
-codex --profile remote_enabled
-```
-
 ## 一般的なハードニングのコツ
 
 ### 1. デフォルトは狭く、必要時だけ広げる
@@ -392,7 +379,24 @@ persistence = "save-all"
 - `.codex/config.toml` に、必要な追加設定だけを書く
 - 例: 特定リポジトリだけ追加の `writable_roots` が必要な場合
 
+### 日常の使い分け
+
+テンプレートに profile を定義しておけば、用途に応じて切り替えられます。
+
+```bash
+# 調査だけしたい
+codex --profile readonly_quiet
+
+# 通常のローカル編集
+codex --profile local_write
+
+# ネットワークが必要な時だけ
+codex --profile remote_enabled
+```
+
 ### 一時的な例外
+
+profile で足りない場合は、一時オプションで補えます。
 
 ```bash
 # 追加ディレクトリだけ書けるようにする
