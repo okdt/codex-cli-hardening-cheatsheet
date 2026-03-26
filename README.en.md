@@ -20,28 +20,6 @@ This is not official OpenAI documentation. Before applying any settings in produ
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
   Smaller template with only the core safety-oriented settings
 
-## Recommended Baseline
-
-For many users, a simple shared baseline like this is a practical place to start:
-
-```toml
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-network_access = false
-
-[history]
-persistence = "save-all"
-```
-
-The intent behind that baseline is:
-
-- require approval for higher-impact actions
-- keep writes inside the workspace
-- keep network disabled by default
-- preserve local history for usability, while keeping `none` available for stricter environments
-
 ## How To Use
 
 This repository is meant to work for a range of readers, from people who want a safer shared default to people who want to tune Codex CLI around a specific project or operational model.
