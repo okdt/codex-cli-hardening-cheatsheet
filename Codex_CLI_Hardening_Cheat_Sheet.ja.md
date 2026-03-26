@@ -147,8 +147,6 @@ Codex CLI の sandbox は 3 段階です。
 - `workspace-write`: ワークスペース内だけ書ける。日常の基準
 - `danger-full-access`: 名前の通り、ほぼ何でもできる。ホームディレクトリの `.gitconfig`、`.bashrc`、`~/.ssh/config` すら書き換え可能
 
-**推奨:**
-
 ```toml
 sandbox_mode = "workspace-write"
 
@@ -179,8 +177,6 @@ Codex CLI の approval policy は 3 つです。
 - `on-request`: sandbox 境界を超える操作で承認を求める。日常運用の現実的な落としどころ
 - `never`: 承認なし。`read-only` sandbox と組み合わせる調査用途には合うが、書き込み権限と組み合わせると危険
 
-**推奨:**
-
 ```toml
 approval_policy = "on-request"
 ```
@@ -195,8 +191,6 @@ approval_policy = "on-request"
 ネットワークは sandbox 配下の設定ですが、独立した防御層として重要です。`workspace-write` でも、必要がなければ閉じておくのが基本です。ローカルの事故はローカルで済みますが、ネットワークが開いているとデータが外に出る可能性があります。
 
 外部コンテンツは indirect prompt injection の入口にもなります。`npm install` で取得したパッケージの README、postinstall スクリプト、参照先ドキュメント、Issue テキスト——こうした場所に悪意ある指示が混ざっていた場合、ネットワークが開いているほど行動半径が広がります。data exfiltration（情報の持ち出し）の観点でも、既定で閉じておく方が扱いやすいです。
-
-**推奨:**
 
 ```toml
 [sandbox_workspace_write]
@@ -216,8 +210,6 @@ network_access = true
 
 履歴保存は便利ですが、何が残るかを意識しておく必要があります。
 セッション履歴には、あなたが入力したプロンプト、AI の応答、実行されたコマンドとその結果が含まれます。つまり、作業中に触れた情報——API キー断片、接続先ホスト名、障害調査メモ、内部 URL、顧客固有の識別子——がそのまま残ります。
-
-**推奨:**
 
 ```toml
 [history]
