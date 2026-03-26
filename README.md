@@ -22,28 +22,6 @@ English: [README.en.md](./README.en.md)
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
   最小限の安全設定だけを抜き出した軽量テンプレート
 
-## Recommended Baseline
-
-まずは次のような単純な共通デフォルトから始めるのが扱いやすいです。
-
-```toml
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-network_access = false
-
-[history]
-persistence = "save-all"
-```
-
-このベースラインは次の意図を持っています。
-
-- 影響の大きい操作は承認付きにする
-- 書き込みはワークスペース内に留める
-- ネットワークは既定で無効にする
-- ローカル履歴は利便性のため保存し、必要なら `none` を選べるようにする
-
 ## How To Use
 
 このドキュメントは、まず安全な共通デフォルトを知りたい初学者から、
