@@ -102,22 +102,9 @@ Codex CLI では次の設定がこの考え方に対応します。
 - `full_auto` のような誤解を招きやすい名前を避ける
 - 共通テンプレートは単純に保ち、例外は profile や一時オプションで与える
 
-## 結論
-
-共通デフォルトの出発点としては、次の方針が扱いやすいです。
-
-- `sandbox_mode = "workspace-write"`
-- `approval_policy = "on-request"`
-- `network_access = false`
-- `history.persistence = "save-all"` を基本にし、必要なら `none` へ切り替える
-- `allow_login_shell = false`
-- `writable_roots = []`
-
-この組み合わせなら、ワークスペース内の通常編集は進めやすく、ネットワークや権限拡大は明示時だけにできます。
-
 ## Quick Start
 
-### 最小安全テンプレート
+共通デフォルトの出発点としては、次のテンプレートが扱いやすいです。ワークスペース内の通常編集は進めやすく、ネットワークや権限拡大は明示時だけにできます。
 
 ```toml
 model = "gpt-5.4"
