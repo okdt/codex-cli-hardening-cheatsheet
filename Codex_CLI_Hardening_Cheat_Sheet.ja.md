@@ -162,7 +162,7 @@ writable_roots = []
 - `/tmp` や `$TMPDIR` を writable root に含めると、一時ファイル経由で sandbox 外にデータを受け渡す経路ができてしまいます
 - 追加ディレクトリが必要な時は `--add-dir /path/to/dir` で一時的に足す方が、設定を恒久的に広げるより安全です
 
-**避ける:**
+**避けること:**
 
 ```toml
 sandbox_mode = "danger-full-access"
@@ -210,7 +210,7 @@ network_access = false
 network_access = true
 ```
 
-**避ける:** 共通デフォルトでの `network_access = true`。ネットワークが常時開いていると、indirect prompt injection で誘導された操作がそのまま外部に到達します。また、意図せずトークンや内部情報が外部リクエストに乗ることもあります。
+**避けること:** 共通デフォルトでの `network_access = true`。ネットワークが常時開いていると、indirect prompt injection で誘導された操作がそのまま外部に到達します。また、意図せずトークンや内部情報が外部リクエストに乗ることもあります。
 
 ### 4. 履歴保存の制限
 
