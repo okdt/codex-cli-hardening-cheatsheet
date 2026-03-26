@@ -199,6 +199,8 @@ approval_policy = "on-request"
 
 ```toml
 # ~/.codex/config.toml
+sandbox_mode = "workspace-write"   # この前提で ↓ が効く
+
 [sandbox_workspace_write]
 network_access = false   # default
 ```
