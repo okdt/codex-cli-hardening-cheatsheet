@@ -282,6 +282,33 @@ endpoint = "https://otlp.example.com"
 
 `config.toml` の中に `[profiles.名前]` セクションで複数の profile を定義しておけば、`--profile` オプションで切り替えられます。ベースの設定を profile の値で上書きする仕組みです。
 
+```toml
+# ~/.codex/config.toml
+
+# ベースの設定
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# profile はここに並べる
+[profiles.readonly_quiet]
+approval_policy = "never"
+sandbox_mode = "read-only"
+
+[profiles.local_write]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.remote_enabled]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.remote_enabled.sandbox_workspace_write]
+network_access = true
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+writable_roots = []
+```
+
 ```bash
 # 調査だけしたい
 codex --profile readonly_quiet
