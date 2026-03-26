@@ -143,7 +143,7 @@ writable_roots = []
 
 `sandbox_mode` は 3 段階です。
 
-- `read-only`: 一切書き込めない。調査・確認専用
+- `read-only` (default): 一切書き込めない。調査・確認専用
 - `workspace-write`: ワークスペース内だけ書ける。日常の基準
 - `danger-full-access`: 名前の通り、ほぼ何でもできる。ホームディレクトリの `.gitconfig`、`.bashrc`、`~/.ssh/config` すら書き換え可能
 
@@ -177,7 +177,7 @@ approval_policy = "never"
 Codex CLI の approval policy は 3 つです。
 
 - `untrusted`: すべての操作に承認が必要。最も堅いが、使い続けるには重い
-- `on-request`: sandbox 境界を超える操作で承認を求める。日常運用の現実的な落としどころ
+- `on-request` (default): sandbox 境界を超える操作で承認を求める。日常運用の現実的な落としどころ
 - `never`: 承認なし。`read-only` sandbox と組み合わせる調査用途には合うが、書き込み権限と組み合わせると危険
 
 ```toml
@@ -200,7 +200,7 @@ approval_policy = "on-request"
 ```toml
 # ~/.codex/config.toml
 [sandbox_workspace_write]
-network_access = false
+network_access = false   # default
 ```
 
 必要時だけ profile で有効化:
@@ -221,7 +221,7 @@ network_access = true
 ```toml
 # ~/.codex/config.toml
 [history]
-persistence = "save-all"
+persistence = "save-all"   # default
 ```
 
 - 日常の振り返りや継続作業には履歴保存が有用
