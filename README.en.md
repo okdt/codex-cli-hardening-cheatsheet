@@ -62,7 +62,7 @@ It is not mainly about:
 
 - OpenAI Help: https://help.openai.com/en/articles/11369540/
 - OpenAI Codex config example discussion: https://github.com/openai/codex/issues/2760
-- Claude Code hardening cheatsheet by okdt: https://github.com/okdt/claude-code-hardening-cheatsheet/blob/main/Claude_Code_Hardening_Cheat_Sheet.en.md
+- Claude Code hardening cheatsheet by okdt: https://github.com/okdt/claude-code-hardening-cheatsheet
 
 ## Author
 
