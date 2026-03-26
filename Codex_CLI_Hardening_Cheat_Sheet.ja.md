@@ -175,7 +175,7 @@ writable_roots = []
 
 ## 項目別の設定ガイド
 
-### sandbox
+### サンドボックス化
 
 Codex CLI の sandbox は 3 段階です。
 
@@ -207,7 +207,7 @@ approval_policy = "never"
 
 これはほぼフルアクセスです。隔離済みの外部環境でない限り、共通デフォルトにすべきではありません。問題は「悪意あるコマンド」だけではありません。AI は技術的に正しいことを、あなたの意図を超えてやります。「整理しておきますね」とワークスペース外のファイルを消す。「設定を直しておきました」と `.gitconfig` を書き換える。「古いキャッシュを削除しておきました」と `/tmp` 配下を一掃する。どれも技術的には間違っていないかもしれませんが、あなたが頼んだことではありません。`danger-full-access` + `approval_policy = "never"` は、この「善意だが雑な自動化」をすべて素通しにします。
 
-### approval
+### 承認ポリシーの組み方
 
 Codex CLI の approval policy は 3 つです。
 
@@ -226,7 +226,7 @@ approval_policy = "on-request"
 - 共通テンプレートに granular 設定まで入れなくてよい
 - high-risk action に human-in-the-loop を入れるという意味で、[OWASP の AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html) が推奨する方針とも一致します
 
-### network
+### ネットワーク制限
 
 ネットワークは sandbox 配下の設定ですが、独立した防御層として重要です。`workspace-write` でも、必要がなければ閉じておくのが基本です。
 
@@ -250,7 +250,7 @@ network_access = true
 
 **避ける:** 共通デフォルトでの `network_access = true`。ネットワークが常時開いていると、indirect prompt injection で誘導された操作がそのまま外部に到達します。また、意図せずトークンや内部情報が外部リクエストに乗ることもあります。
 
-### history
+### 履歴保存の抑制
 
 履歴保存は便利ですが、何が残るかを意識しておく必要があります。
 セッション履歴には、あなたが入力したプロンプト、AI の応答、実行されたコマンドとその結果が含まれます。つまり、作業中に触れた情報——API キー断片、接続先ホスト名、障害調査メモ、内部 URL、顧客固有の識別子——がそのまま残ります。
@@ -269,7 +269,7 @@ persistence = "save-all"
 
 **注意:** `save-all` を無条件で正当化しないこと。機密性の高い環境では `none` の方が適切なことがあります。共有端末や退職者のアカウント引き継ぎ時に、想像以上の情報が読めてしまうことがあります。
 
-### ログ
+### ログ記録
 
 Codex CLI は、公式ドキュメントで目立つ扱いではないものの、本格的な監査・テレメトリ基盤を持っています。
 
