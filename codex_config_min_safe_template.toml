@@ -43,12 +43,12 @@ sandbox_mode = "read-only"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled]
-# Same editing posture as local_write, but with network access enabled.
+[profiles.remote_enabled]
+# Same editing posture as local_write, but intended for work that reaches beyond local resources.
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled.sandbox_workspace_write]
+[profiles.remote_enabled.sandbox_workspace_write]
 network_access = true
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true

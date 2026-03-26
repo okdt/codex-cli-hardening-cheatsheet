@@ -55,7 +55,7 @@ In Codex CLI, that maps naturally to:
 - `network_access = false`
 - `allow_login_shell = false`
 
-When extra access is needed, it is usually safer to add it temporarily through `--add-dir` or a dedicated profile such as `net_enabled`.
+When extra access is needed, it is usually safer to add it temporarily through `--add-dir` or a dedicated profile such as `remote_enabled`.
 
 ### Defense In Depth
 
@@ -109,7 +109,7 @@ That is why this cheatsheet treats `workspace-write` as the main baseline and mo
 
 In Codex CLI, `network_access` lives under `sandbox_workspace_write`. In practice, that means network policy is not just "on or off" in the abstract. It is tied to a specific execution posture.
 
-That is also why this cheatsheet separates `net_enabled` into its own profile instead of treating network access as a casual toggle.
+That is also why this cheatsheet separates `remote_enabled` into its own profile instead of treating network access as a casual toggle.
 
 ### 4. Profiles Fit The Operational Model Well
 
@@ -117,9 +117,9 @@ Codex CLI works well with profile-based deltas. That makes it easy to keep the s
 
 Typical examples:
 
-- `readonly_quiet`
-- `local_write`
-- `net_enabled`
+- `readonly_quiet`: for inspection and review
+- `local_write`: for normal local editing
+- `remote_enabled`: for work that touches resources beyond the local machine, such as external references, dependency fetches, or API use
 
 When permissions and purpose line up cleanly, mistakes become less likely.
 
@@ -152,8 +152,8 @@ Those are not generic AI-agent talking points. They are Codex CLI operational de
 
 ### 7. `instructions.md` Is Not Where Security Policy Should Live
 
-Around Codex CLI, the naming of instruction files can vary across versions or docs: you may see `~/.codex/instructions.md`, `AGENTS.md`, `CODEX.md`, or related guidance.
-What matters here is that these files are for context and workflow guidance, not for enforcing hard security boundaries.
+Codex CLI can use project-context files such as `AGENTS.md`, as well as global instruction files such as `~/.codex/instructions.md`.
+Their scope and purpose differ, but the important point is the same: these files are for context and workflow guidance, not for enforcing hard security boundaries.
 
 They are useful for things like:
 
@@ -211,11 +211,11 @@ sandbox_mode = "read-only"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled]
+[profiles.remote_enabled]
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled.sandbox_workspace_write]
+[profiles.remote_enabled.sandbox_workspace_write]
 network_access = true
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
@@ -232,7 +232,7 @@ codex --profile readonly_quiet
 codex --profile local_write
 
 # Only when network access is actually needed
-codex --profile net_enabled
+codex --profile remote_enabled
 ```
 
 ## General Hardening Tips
@@ -261,7 +261,7 @@ codex --profile net_enabled
 ### 4. Keep Names Aligned With Behavior
 
 - If approval is still required, do not call the profile `full_auto`
-- Prefer names such as `readonly_quiet`, `local_write`, and `net_enabled` that reflect purpose clearly
+- Prefer names such as `readonly_quiet`, `local_write`, and `remote_enabled` that reflect purpose clearly
 
 ### 5. Keep The Shared Baseline Simple, Use Temporary Exceptions
 
@@ -334,11 +334,11 @@ network_access = false
 Enable it only through a profile when needed:
 
 ```toml
-[profiles.net_enabled]
+[profiles.remote_enabled]
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled.sandbox_workspace_write]
+[profiles.remote_enabled.sandbox_workspace_write]
 network_access = true
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
@@ -403,11 +403,11 @@ Good for:
 ### 3. Turn Network On Only When Needed
 
 ```toml
-[profiles.net_enabled]
+[profiles.remote_enabled]
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.net_enabled.sandbox_workspace_write]
+[profiles.remote_enabled.sandbox_workspace_write]
 network_access = true
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
@@ -487,9 +487,9 @@ codex --config sandbox_workspace_write.network_access=true
 ### Operational Notes For Profiles
 
 - Treat profiles as launch-time execution posture, and pass the one you want explicitly
-- In particular, after using `net_enabled`, it is easy to keep working with a broader-than-intended mindset unless you consciously switch back
+- In particular, after using `remote_enabled`, it is easy to keep working with a broader-than-intended mindset unless you consciously switch back
 - In CI or automation, pin the profile explicitly instead of relying on ambient defaults
-- Even for human workflows, it helps to make the rule explicit: use `local_write` by default, and reach for `net_enabled` only when the task clearly requires it
+- Even for human workflows, it helps to make the rule explicit: use `local_write` by default, and reach for `remote_enabled` only when the task clearly requires it
 
 ## Included Template Files
 
