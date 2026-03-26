@@ -9,13 +9,13 @@ It follows the same "usable in the real world" structure as the Claude Code hard
 Codex CLI can read and write files, run shell commands, change settings, and in some cases access the network. That is powerful, but loose defaults can create avoidable risk.
 
 - **Indirect prompt injection can steer the agent into unintended actions**
-  OWASP `LLM01:2025 Prompt Injection`. A fetched README, issue, document, or generated artifact may contain instructions that pull the model off course.
+  A fetched README, issue, document, or generated artifact may contain instructions that pull the model off course ([OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llm-top-10/)).
 - **Overly broad permissions turn bad decisions into real damage**
-  OWASP `LLM06:2025 Excessive Agency`. If you hand out `danger-full-access` or broad writable roots, ordinary mistakes become high-impact actions.
+  If you hand out `danger-full-access` or broad writable roots, ordinary mistakes become high-impact actions ([OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llm-top-10/)).
 - **History and retained context can expose sensitive information**
-  OWASP `LLM02:2025 Sensitive Information Disclosure`. Prompts, internal URLs, connection targets, token fragments, and operational notes can all end up stored locally.
+  Prompts, internal URLs, connection targets, token fragments, and operational notes can all end up stored locally ([OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llm-top-10/)).
 - **Plausible-looking advice can still be wrong**
-  OWASP `LLM09:2025 Misinformation`. A recommendation that sounds reasonable still needs verification before it becomes policy.
+  A recommendation that sounds reasonable still needs verification before it becomes policy ([OWASP LLM09:2025 Misinformation](https://genai.owasp.org/llm-top-10/)).
 - **Vague profile names or approval rules create operational mistakes**
   This is partly a configuration management problem, but in practice it turns into misuse of permissions and skipped review.
 
