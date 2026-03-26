@@ -52,11 +52,11 @@ It is not mainly about:
 
 ## Notes
 
-- Config keys and behavior may change across Codex CLI versions
-- The shared templates prioritize clarity and operational simplicity first
-- Fine-grained approval setups should usually come after the team has a concrete need for them
 - The main cheatsheet also explains how OWASP GenAI and prompt-injection references can inform Codex CLI hardening decisions
 - It also covers secure design principles such as human-in-the-loop, least privilege, and defense in depth
+- The shared templates prioritize clarity and operational simplicity first
+- Fine-grained approval setups should usually come after the team has a concrete need for them
+- Config keys and behavior may change across Codex CLI versions
 
 ## References
 
