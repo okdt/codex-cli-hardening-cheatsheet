@@ -8,11 +8,16 @@ It follows the same "usable in the real world" structure as the Claude Code hard
 
 Codex CLI can read and write files, run shell commands, change settings, and in some cases access the network. That is powerful, but loose defaults can create avoidable risk.
 
-- Accidentally modifying files outside the intended workspace
-- Running unintended commands that alter or pollute the local environment
-- Fetching dependencies or calling external APIs when that was not the original intent
-- Leaving sensitive context in local history or session traces
-- Creating operational confusion through vague profile names or approval rules
+- **Indirect prompt injection can steer the agent into unintended actions**
+  OWASP `LLM01:2025 Prompt Injection`. A fetched README, issue, document, or generated artifact may contain instructions that pull the model off course.
+- **Overly broad permissions turn bad decisions into real damage**
+  OWASP `LLM06:2025 Excessive Agency`. If you hand out `danger-full-access` or broad writable roots, ordinary mistakes become high-impact actions.
+- **History and retained context can expose sensitive information**
+  OWASP `LLM02:2025 Sensitive Information Disclosure`. Prompts, internal URLs, connection targets, token fragments, and operational notes can all end up stored locally.
+- **Plausible-looking advice can still be wrong**
+  OWASP `LLM09:2025 Misinformation`. A recommendation that sounds reasonable still needs verification before it becomes policy.
+- **Vague profile names or approval rules create operational mistakes**
+  This is partly a configuration management problem, but in practice it turns into misuse of permissions and skipped review.
 
 This cheatsheet is meant to reduce those risks without making everyday development unnecessarily painful.
 
@@ -151,6 +156,27 @@ Codex CLI also has practical tuning points that do not fit into a simple allow/d
 
 Those are not generic AI-agent talking points. They are Codex CLI operational decisions.
 
+### 7. `instructions.md` Is Not Where Security Policy Should Live
+
+Around Codex CLI, the naming of instruction files can vary across versions or docs: you may see `~/.codex/instructions.md`, `AGENTS.md`, `CODEX.md`, or related guidance.
+What matters here is that these files are for context and workflow guidance, not for enforcing hard security boundaries.
+
+They are useful for things like:
+
+- naming conventions
+- coding guidelines
+- review expectations
+- project-specific context the agent should keep in mind
+
+They are not a safe place to rely on for controls such as:
+
+- disabling network access
+- preventing writes outside specific directories
+- blocking destructive commands
+- requiring approval for high-risk actions
+
+Those controls belong in `config.toml`, through `sandbox`, `approval`, and `network` settings. Instruction files should stay supplemental.
+
 ## Bottom Line
 
 A good starting baseline is:
@@ -228,6 +254,7 @@ codex --profile net_enabled
 - Outbound communication increases the impact of unintended actions
 - Only enable it when dependency fetches, web access, or external APIs are actually required
 - Remote content is also one of the entry points for prompt injection and data exfiltration
+- For example, if a package README, issue thread, or surrounding install context nudges the model toward an unsafe next step, open network access gives that mistake much more room to spread
 
 ### 3. Treat History As A Usability vs. Retention Tradeoff
 
@@ -235,6 +262,7 @@ codex --profile net_enabled
 - For day-to-day work, `history.persistence = "save-all"` is often more practical
 - When confidentiality matters more, switch to `history.persistence = "none"`
 - In agentic workflows, retained context is itself part of the risk surface
+- That can include pasted API keys, DB connection strings, internal URLs, ticket IDs, and fragments from incident investigation
 
 ### 4. Keep Names Aligned With Behavior
 
@@ -327,6 +355,7 @@ Key points:
 
 - Fetching remote content can become an entry point for indirect prompt injection
 - It is safer to keep network access closed by default and open it deliberately
+- A concrete example: if the model reads an external README or issue and gets nudged toward "install this first" or "run this helper script," open network access gives that chain of actions more reach
 
 ### history
 
@@ -343,6 +372,7 @@ Key points:
 
 - Persisted history helps with continuity and review in day-to-day work
 - It can also retain prompts and sensitive context
+- That may include token fragments, hostnames, internal URLs, debugging notes, and customer-specific identifiers
 - This matters even more on shared machines or in regulated environments
 - Over time, context retention and persistence attacks become part of the model
 
@@ -406,6 +436,7 @@ approval_policy = "never"
 ```
 
 This is effectively near-full access. Unless you are already inside a deliberately isolated environment, it should not be the shared default.
+The risk is not only obviously malicious commands. It is also well-intentioned but sloppy automation: broad `rm -rf`, over-permissive `chmod`, clobbering generated files, or modifying dotfiles and local configuration outside the project.
 
 ### 2. Always-On Network Access
 
@@ -458,6 +489,13 @@ codex --profile local_write --add-dir /path/to/output
 # Enable network access temporarily
 codex --config sandbox_workspace_write.network_access=true
 ```
+
+### Operational Notes For Profiles
+
+- Treat profiles as launch-time execution posture, and pass the one you want explicitly
+- In particular, after using `net_enabled`, it is easy to keep working with a broader-than-intended mindset unless you consciously switch back
+- In CI or automation, pin the profile explicitly instead of relying on ambient defaults
+- Even for human workflows, it helps to make the rule explicit: use `local_write` by default, and reach for `net_enabled` only when the task clearly requires it
 
 ## Included Template Files
 
