@@ -141,7 +141,7 @@ writable_roots = []
 
 ### 1. サンドボックス化
 
-Codex CLI の sandbox は 3 段階です。
+`sandbox_mode` は 3 段階です。
 
 - `read-only`: 一切書き込めない。調査・確認専用
 - `workspace-write`: ワークスペース内だけ書ける。日常の基準
