@@ -2,7 +2,7 @@
 
 Codex CLI はファイルの読み書き、シェルコマンド実行、設定変更、場合によっては外部通信まで扱えます。これは強力で、同時にリスクが伴います。
 
-このチートシートは、そのリスクをコントロールするための設定ガイドです。`sandbox / approval / network / history` を中心に、安全寄りの構成を Codex CLI の公式ドキュメントに合わせて整理しています。初心者はまず Quick Start のテンプレートだけでも入れてください。設計判断から理解したい人は、通して読んでもらえれば根拠が分かるようにしてあります。
+このチートシートは、そのリスクをコントロールするための設定ガイドです。`sandbox / approval / network / history` を中心に、安全寄りの構成を Codex CLI の公式ドキュメントに合わせて整理しています。初心者はまず「導入の仕方」の Quick Start テンプレートだけでも入れてください。設計判断から理解したい人は、通して読んでもらえれば根拠が分かるようにしてあります。
 
 ## リスク — なぜハードニング（セキュリティ堅牢化）設定が必要なのか
 
@@ -98,45 +98,6 @@ Codex CLI では次の設定がこの考え方に対応します。
 - `readonly_quiet` のように用途が分かる名前を使う
 - `full_auto` のような誤解を招きやすい名前を避ける
 - 共通テンプレートは単純に保ち、例外は profile や一時オプションで与える
-
-## Quick Start
-
-以下を `~/.codex/config.toml` に置いてください。共通デフォルトの出発点としてはこれが扱いやすいです。ワークスペース内の通常編集は進めやすく、ネットワークなど権限の拡大は指示が必要となり、ゴーサインを明示した場合に限定されます。
-
-```toml
-model = "gpt-5.4"
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-allow_login_shell = false
-
-[history]
-persistence = "save-all"
-
-[sandbox_workspace_write]
-network_access = false
-exclude_slash_tmp = true
-exclude_tmpdir_env_var = true
-writable_roots = []
-
-# 以下、切り替え用 profile
-[profiles.readonly_quiet]
-approval_policy = "never"
-sandbox_mode = "read-only"
-
-[profiles.local_write]
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[profiles.remote_enabled]
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[profiles.remote_enabled.sandbox_workspace_write]
-network_access = true
-exclude_slash_tmp = true
-exclude_tmpdir_env_var = true
-writable_roots = []
-```
 
 ## ハードニングしよう
 
@@ -272,27 +233,27 @@ endpoint = "https://otlp.example.com"
 
 ## 導入の仕方
 
-### 個人の標準設定
+### Quick Start
 
-- `~/.codex/config.toml` に最小安全テンプレートを置く
-
-### プロジェクト固有の調整
-
-- `.codex/config.toml` に、必要な追加設定だけを書く
-- 例: 特定リポジトリだけ追加の `writable_roots` が必要な場合
-
-### 日常の使い分け
-
-`config.toml` の中に `[profiles.名前]` セクションで複数の profile を定義しておけば、`--profile` オプションで切り替えられます。ベースの設定を profile の値で上書きする仕組みです。
+以下を `~/.codex/config.toml` に置いてください。共通デフォルトの出発点としてはこれが扱いやすいです。ワークスペース内の通常編集は進めやすく、ネットワークなど権限の拡大は指示が必要となり、ゴーサインを明示した場合に限定されます。
 
 ```toml
 # ~/.codex/config.toml
-
-# ベースの設定
+model = "gpt-5.4"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+allow_login_shell = false
 
-# profile はここに並べる
+[history]
+persistence = "save-all"
+
+[sandbox_workspace_write]
+network_access = false
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+writable_roots = []
+
+# 以下、切り替え用 profile
 [profiles.readonly_quiet]
 approval_policy = "never"
 sandbox_mode = "read-only"
@@ -311,6 +272,15 @@ exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
 writable_roots = []
 ```
+
+### プロジェクト固有の調整
+
+- `.codex/config.toml`（プロジェクトルート）に、必要な追加設定だけを書く
+- 例: 特定リポジトリだけ追加の `writable_roots` が必要な場合
+
+### 日常の使い分け
+
+`config.toml` の中に `[profiles.名前]` セクションで複数の profile を定義しておけば、`--profile` オプションで切り替えられます。ベースの設定を profile の値で上書きする仕組みです。
 
 ```bash
 # 調査だけしたい
