@@ -348,4 +348,4 @@ codex --config sandbox_workspace_write.network_access=true
 - [OWASP GenAI Security Project](https://genai.owasp.org/)
 - [OWASP Prompt Injection](https://owasp.org/www-community/attacks/PromptInjection)
 - [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
-- [Claude Code Hardening Cheat Sheet.ja](https://github.com/okdt/claude-code-hardening-cheatsheet/blob/main/Claude_Code_Hardening_Cheat_Sheet.ja.md)
+- [Claude Code Hardening Cheatsheet](https://github.com/okdt/claude-code-hardening-cheatsheet)
