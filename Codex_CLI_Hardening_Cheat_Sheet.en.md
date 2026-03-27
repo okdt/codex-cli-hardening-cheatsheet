@@ -277,10 +277,12 @@ allow_login_shell = false
 persistence = "save-all"
 
 [sandbox_workspace_write]
-network_access = false
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
 writable_roots = []
+
+# If you do not need to access the network
+# network_access = false
 
 # Optional switching profiles
 [profiles.readonly_quiet]
