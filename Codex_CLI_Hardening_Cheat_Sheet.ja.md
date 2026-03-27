@@ -76,8 +76,10 @@ Codex CLI では次の設定がこの考え方に対応します。
 
 - `sandbox_mode = "workspace-write"`
 - `writable_roots = []`
-- `network_access = false`
 - `allow_login_shell = false`
+
+ネットワークも制限した状態からスタートするなら
+- `network_access = false`
 
 必要な時だけ `--add-dir` や `remote_enabled` profile で例外を与える方が、安全性と実用性の両立がしやすくなります。
 
@@ -263,10 +265,12 @@ allow_login_shell = false
 persistence = "save-all"
 
 [sandbox_workspace_write]
-network_access = false
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
 writable_roots = []
+
+# ネットワーク制限からスタートするなら
+network_access = false
 
 # 以下、切り替え用 profile
 [profiles.readonly_quiet]
