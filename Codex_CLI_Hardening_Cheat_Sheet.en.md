@@ -48,7 +48,7 @@ Those controls are better enforced through `config.toml`, specifically the `sand
 
 They also have size limits. According to OpenAI's official guidance, user-instruction material is subject to a 32 KiB limit. That is another reason not to turn these files into an ever-growing operating manual.
 
-For both reasons, instruction-family files are not a suitable place to express security restrictions. If something genuinely must not happen, it should be enforced as policy, not merely requested as guidance. That is the starting point for the rest of this document.
+For both reasons, instruction-family files are not the right place for security restrictions. If something genuinely must not happen, it should be enforced as policy, not merely requested as guidance. That is the starting point for the rest of this document.
 
 ## Core Secure Design Principles
 
@@ -181,11 +181,11 @@ At the moment, these rules operate on shell-command prefixes. They are not file-
 
 ### 3. Network Restrictions
 
-Network access is configured under the sandbox, but it deserves to be treated as its own defensive layer. Even with `workspace-write`, the safer default is to keep it off unless there is a clear reason to turn it on.
+Network access is configured under the sandbox, but it can be set independently from other sandbox settings. Setting `network_access = false` blocks all outbound communication at the OS level — this is a hard block that approval cannot override.
 
-Local mistakes often stay local. Once the network is open, information and actions can cross the machine boundary.
+In practice, most users will run with `network_access = true`. But for tasks that do not need external access — internal refactoring, data cleanup, local code generation — there is no reason to leave the network open. Use `false` for those.
 
-Remote content is also one of the main entry points for indirect prompt injection: package READMEs, post-install scripts, linked documentation, and issue threads can all contain instructions that influence the model. If network access is already open, those nudges have much more room to spread. The same is true for data exfiltration risk.
+Remote content is also one of the main entry points for indirect prompt injection: package READMEs, post-install scripts, linked documentation, and issue threads can all contain instructions that influence the model. If network access is already open, those nudges have much more room to spread. The same applies to data exfiltration.
 
 ```toml
 # ~/.codex/config.toml
