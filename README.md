@@ -7,7 +7,9 @@ English: [README.en.md](./README.en.md)
 このリポジトリの目的は次の 2 点です。
 
 - 一般的なハードニングのコツを、Codex CLI の日常運用に落とし込んで整理する
-- `sandbox` / `approval` / `network` / `history` など、Codex CLI で実際に効く設定例をすぐ使える形で提供する
+- `sandbox` / `approval` / `network` / `history` / シークレットの扱いなど、Codex CLI で実際に効く設定例をすぐ使える形で提供する
+
+**とくにシークレットの扱いは、設定を間違えても後から直せない唯一の領域です。** API キーを `config.toml` に書かず、OS キーチェーンやシークレットマネージャから起動時に渡す方法を、チートシート §5 にまとめています。
 
 これは OpenAI 公式ドキュメントではありません。実運用前に、利用中の Codex CLI バージョンと公式情報を必ず確認してください。
 
@@ -45,10 +47,13 @@ English: [README.en.md](./README.en.md)
 このリポジトリは、次のような観点を扱います。
 
 - Codex CLI の `sandbox` 設定
-- `approval_policy` の基本方針
-- ネットワーク有効化の切り分け
-- ローカル履歴保持のリスク
+- `approval_policy` の基本方針（`granular` を含む）
+- ネットワーク有効化の切り分けと、Web 検索による外部コンテンツの取り込み
+- シークレットと認証情報の置き場（OS キーチェーン、環境変数経由の受け渡し）
+- MCP サーバのツール許可リスト
+- ローカル履歴・メモリ保持のリスク
 - 共通テンプレートとプロファイル運用
+- 組織配布（`requirements.toml`）と、beta の権限プロファイル
 
 次のものは主目的ではありません。
 
@@ -62,11 +67,13 @@ English: [README.en.md](./README.en.md)
 - また、`Human-In-The-Loop`、最小権限の原則、多層防御といったセキュア設計の基本原則もあわせて解説しています
 - 共通テンプレートは、まず単純で説明しやすいことを優先しています
 - `granular` のような細分化設定は、運用要件が固まってから追加する方が安全です
-- 設定キーや挙動は Codex CLI のバージョンによって変わる可能性があります
+- 設定キーや挙動は Codex CLI のバージョンによって変わります。本文は **Codex CLI 0.146.0（2026-08-01 時点）**の公式ドキュメントと実機の双方で確認しています。両者が食い違う箇所は本文に明記しました
 
 ## References
 
-- OpenAI Help: https://help.openai.com/en/articles/11369540/
+- Codex Configuration reference: https://developers.openai.com/codex/config-reference
+- Codex Permissions（beta）: https://developers.openai.com/codex/permissions
+- Codex Admin-enforced requirements: https://developers.openai.com/codex/enterprise/managed-configuration
 - OpenAI Codex config example discussion: https://github.com/openai/codex/issues/2760
 - Claude Code hardening cheatsheet by okdt: https://github.com/okdt/claude-code-hardening-cheatsheet
 

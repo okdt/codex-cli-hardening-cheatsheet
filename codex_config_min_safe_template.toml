@@ -1,12 +1,16 @@
 # Minimal safety-first template for Codex CLI.
 # Save as ~/.codex/config.toml for your user default.
-# Then use profiles or CLI flags to temporarily relax settings.
+# Then use profile files or CLI flags to temporarily relax settings.
+#
+# The aim is a default you will actually keep: ordinary editing and web research
+# work normally, while writes stay inside the workspace and anything leaving it
+# stops for a human.
 
-# Pick the model name your current CLI accepts.
-# In current OpenAI docs, gpt-5.4 is a safe general default.
-model = "gpt-5.4"
+# Model is intentionally not pinned here: model names go stale every generation,
+# and the choice is not a hardening control. Set it separately if you need to.
 
 # Interactive local work: ask when the action crosses a trust boundary.
+# Values: untrusted | on-request | granular | never  ("on-failure" is deprecated)
 approval_policy = "on-request"
 
 # Allow editing inside the workspace without removing the sandbox entirely.
@@ -15,13 +19,26 @@ sandbox_mode = "workspace-write"
 # Hardening option: avoid inheriting login-shell startup behavior.
 allow_login_shell = false
 
+# "cached" is the default and returns pre-indexed results rather than fetching
+# live pages, which reduces prompt-injection exposure. Use "live" deliberately;
+# note that --yolo and other full-access settings promote it to "live".
+web_search = "cached"
+
+# Store credentials in the OS keychain instead of a plaintext auth.json.
+cli_auth_credentials_store = "keyring"
+mcp_oauth_credentials_store = "keyring"
+
 [history]
 # Persist session transcripts for day-to-day usability.
 # If prompts or work context may contain sensitive data, switch this to "none".
 persistence = "save-all"
 
 [sandbox_workspace_write]
-# Keep outbound network disabled unless explicitly needed.
+# Keep outbound network disabled unless explicitly needed. This does NOT block
+# web search, which reaches the model through a separate path; it applies to
+# commands and their subprocesses. With approval_policy = "on-request", commands
+# that need the network (npm install, git fetch) stop and ask rather than fail.
+# For a hard block with no approval path, combine false with "never".
 network_access = false
 
 # Do not widen writable scope to temporary directories by default.
@@ -32,30 +49,54 @@ exclude_tmpdir_env_var = true
 # Keep empty and add only when a real workflow requires it.
 writable_roots = []
 
-[profiles.readonly_quiet]
-# Read-only inspection mode.
-# Useful for unfamiliar repositories, reviews, and reconnaissance.
-approval_policy = "never"
-sandbox_mode = "read-only"
+[shell_environment_policy]
+# Limit what of your environment is inherited by spawned commands.
+# Variables containing KEY / SECRET / TOKEN are excluded by default;
+# do not set ignore_default_excludes = true without understanding it.
+inherit = "core"
 
-[profiles.local_write]
-# Standard profile for normal local edits.
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[profiles.remote_enabled]
-# Same editing posture as local_write, but intended for work that reaches beyond local resources.
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[profiles.remote_enabled.sandbox_workspace_write]
-network_access = true
-exclude_slash_tmp = true
-exclude_tmpdir_env_var = true
-writable_roots = []
+# Profiles are one file each: $CODEX_HOME/<name>.config.toml, selected with
+# `codex --profile <name>` and layered over this file. Because a profile file is
+# a full config layer, it can carry [sandbox_workspace_write] and [history] too.
+# profile は 1 つにつき 1 ファイル。$CODEX_HOME/<name>.config.toml を置き、
+# `codex --profile <name>` で選ぶ。設定ファイルそのものなので
+# [sandbox_workspace_write] や [history] もそのまま書ける。
+#
+# ~/.codex/readonly_quiet.config.toml
+#     approval_policy = "never"
+#     sandbox_mode    = "read-only"
+#
+# ~/.codex/local_write.config.toml
+#     approval_policy = "on-request"
+#     sandbox_mode    = "workspace-write"
+#
+# ~/.codex/remote_enabled.config.toml
+#     approval_policy = "on-request"
+#     sandbox_mode    = "workspace-write"
+#     [sandbox_workspace_write]
+#     network_access  = true
+#     writable_roots  = []
+#
+# ~/.codex/offline_strict.config.toml
+#     approval_policy = "untrusted"
+#     sandbox_mode    = "workspace-write"
+#     web_search      = "disabled"
+#     [sandbox_workspace_write]
+#     network_access  = false
+#     writable_roots  = []
+#     [history]
+#     persistence     = "none"
 
 # Notes:
 # - Prefer `codex --add-dir /path/to/dir` over broadening defaults globally.
 # - Avoid `danger-full-access` as a shared baseline.
-# - Avoid mixing `approval_policy = "on-request"` with [approval_policy.granular]
-#   unless you rewrite approval_policy as an object/table form.
+# - `granular` IS a value of approval_policy, so `approval_policy = "on-request"`
+#   and [approval_policy.granular] cannot both appear. Use one or the other.
+# - Never write secret values here. Point at an environment variable instead
+#   (for example mcp_servers.<id>.bearer_token_env_var) and inject it at launch.
+# - Verify the result: `codex sandbox --log-denials -- <command>` (macOS).
+# - The beta permission profiles (default_permissions / [permissions.*]) do NOT
+#   combine with sandbox_mode / [sandbox_workspace_write]. Pick one model.
+#   Verified on 0.146.0: if both are present, default_permissions WINS. A leftover
+#   default_permissions line will silently override the sandbox_mode above, so
+#   remove it after experimenting with the beta.
