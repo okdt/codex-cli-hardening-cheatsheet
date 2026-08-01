@@ -19,6 +19,8 @@ English: [README.en.md](./README.en.md)
   一般的なハードニングの考え方、Codex CLI の推奨設定、運用上の注意点をまとめた本体
 - [Codex_CLI_Hardening_Cheat_Sheet.en.md](./Codex_CLI_Hardening_Cheat_Sheet.en.md)
   英語版
+- [Codex_CLI_Hardening_Audit_Prompt.ja.md](./Codex_CLI_Hardening_Audit_Prompt.ja.md)
+  **Codex に貼り付けて使う監査プロンプト。** チートシートを読ませ、承認を取りながら一つずつ設定を見直させる（[英語版](./Codex_CLI_Hardening_Audit_Prompt.en.md)）
 - [codex-config.hardened.template.toml](./codex-config.hardened.template.toml)
   コメント付きの `config.toml` テンプレート
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)

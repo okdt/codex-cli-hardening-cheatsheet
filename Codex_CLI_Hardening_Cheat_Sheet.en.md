@@ -8,6 +8,8 @@ In a hurry? Drop the Quick Start from the rollout section into `~/.codex/config.
 
 **Handing this document to Codex and asking it to adjust your `config.toml`** is a good way to use it too. That is why the keys, the defaults, and the reasoning behind each value are all spelled out rather than summarized. Tell it what the work involves, and it can shape this into something that fits your environment.
 
+A ready-to-paste prompt for exactly that ships with this repository → [Codex_CLI_Hardening_Audit_Prompt.en.md](./Codex_CLI_Hardening_Audit_Prompt.en.md)
+
 > **Verified against:** Codex CLI 0.146.0, as of 2026-08-01. Config keys and behavior change between versions. Everything here was checked against both the official documentation and the running binary; where the two disagree, the text says so.
 
 ## Risk: Why Hardening Matters
