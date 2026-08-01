@@ -6,6 +6,8 @@ This cheat sheet is a practical guide to configuring Codex CLI to keep that risk
 
 In a hurry? Drop the Quick Start from the rollout section into `~/.codex/config.toml`. That alone does real work. If you want to know why each value is what it is, read straight through.
 
+**Handing this document to Codex and asking it to adjust your `config.toml`** is a good way to use it too. That is why the keys, the defaults, and the reasoning behind each value are all spelled out rather than summarized. Tell it what the work involves, and it can shape this into something that fits your environment.
+
 > **Verified against:** Codex CLI 0.146.0, as of 2026-08-01. Config keys and behavior change between versions. Everything here was checked against both the official documentation and the running binary; where the two disagree, the text says so.
 
 ## Risk: Why Hardening Matters
@@ -178,7 +180,7 @@ Codex CLI has four approval policies:
 approval_policy = "on-request"
 ```
 
-The older `on-failure` value is deprecated. Use `on-request` for interactive runs and `never` for non-interactive ones.
+`on-failure` is deprecated. Use `on-request` for interactive runs and `never` for non-interactive ones.
 
 That is not a stylistic preference. **Non-interactive runs (`codex exec`) have no approval flag at all, and no approval happens regardless of what `approval_policy` says.** Inside CI and scripts, approvals do not count as a control. Only the sandbox does.
 
@@ -495,7 +497,7 @@ endpoint = "https://otlp.example.com"
 protocol = "binary"        # required; "binary" or "json"
 ```
 
-`protocol` is not optional. Omit it and configuration loading fails outright with `missing field 'protocol'`, which means Codex will not start.
+`protocol` is required (`binary` or `json`).
 
 Typical events include:
 
@@ -663,14 +665,7 @@ codex --profile offline_strict
 
 The official documentation uses `full_auto` as an example filename. This cheatsheet's position is unchanged: if it still asks for approval, do not give it that name.
 
-**If you see this error at startup:**
-
-```
---profile `demo` cannot be used while .../config.toml contains legacy
-`profile = "demo"` or `[profiles.demo]` config
-```
-
-A profile definition is still sitting inside `config.toml`. Move its contents into `<name>.config.toml` and delete the original. If there is a `profile = "<name>"` line, remove that one first: it fails every invocation, with or without `--profile`.
+When migrating an older configuration, check whether `config.toml` still holds a `[profiles.<name>]` table or a `profile = "<name>"` line. Move the contents into `<name>.config.toml` and the same `--profile <name>` keeps working.
 
 ### Temporary Exceptions
 

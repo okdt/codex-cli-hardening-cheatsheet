@@ -6,6 +6,8 @@ Codex CLI はファイルの読み書き、シェルコマンド実行、設定�
 
 急ぐ方は、「導入の仕方」の Quick Start をそのまま `~/.codex/config.toml` に置いてください。それだけでも効きます。なぜその値なのかを知りたい方は、通して読んでください。
 
+**この文書ごと Codex に読ませて、手元の `config.toml` を調整させる**のも有効な使い方です。そのために、設定キーと既定値、そして「なぜその値か」の根拠を、いずれも省略せずに書いてあります。用途を伝えたうえで相談すれば、あなたの環境に合わせた形に落としてくれます。
+
 > **検証環境:** Codex CLI 0.146.0（2026-08-01 時点）。設定キーと挙動は版によって変わります。本文の記述は、公式ドキュメントと実機の双方で確認しています。両者が食い違う箇所は、その旨を明記しました。
 
 ## リスク — なぜハードニング（セキュリティ堅牢化）設定が必要なのか
@@ -176,7 +178,7 @@ Codex CLI の approval policy は 4 つです。
 approval_policy = "on-request"
 ```
 
-なお、かつてあった `on-failure` は非推奨になりました。対話的に使うなら `on-request`、非対話で回すなら `never` です。
+なお `on-failure` は非推奨です。対話的に使うなら `on-request`、非対話で回すなら `never` を選びます。
 
 これは好みの問題ではありません。**非対話実行（`codex exec`）には承認フラグがそもそも無く、`approval_policy` に何を書いていても承認は行われません。** CI やスクリプトの中で、承認を防御として数えることはできない。頼れるのはサンドボックスの側だけです。
 
@@ -501,7 +503,7 @@ endpoint = "https://otlp.example.com"
 protocol = "binary"        # 必須。"binary" または "json"
 ```
 
-`protocol` は省略できません。書き忘れると `missing field 'protocol'` で設定の読み込み自体が失敗し、Codex が起動しなくなります。
+`protocol` は必須のキーです（`binary` または `json`）。
 
 記録される主なイベント:
 
@@ -675,14 +677,7 @@ codex --profile offline_strict
 
 なお公式ドキュメントのサンプルには `full_auto` という名前のファイルが登場しますが、このチートシートの立場は変わりません——実態が「承認あり」なら、その名前は付けないでください。
 
-**起動時にこのエラーが出たら:**
-
-```
---profile `demo` cannot be used while .../config.toml contains legacy
-`profile = "demo"` or `[profiles.demo]` config
-```
-
-`config.toml` の中に profile の定義が残っています。中身を `<名前>.config.toml` へ切り出し、元の記述を消してください。`profile = "<名前>"` という行がある場合は、`--profile` を使わなくてもすべての起動が失敗するので、そちらを先に消します。
+古い設定から移す場合は、`config.toml` に `[profiles.<名前>]` や `profile = "<名前>"` が残っていないか見てください。中身を `<名前>.config.toml` に移せば、そのまま同じ `--profile <名前>` で使えます。
 
 ### 一時的な例外
 

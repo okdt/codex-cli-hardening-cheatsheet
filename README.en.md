@@ -21,6 +21,8 @@ This is not official OpenAI documentation. Before applying any settings in produ
   Commented `config.toml` template
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
   Smaller template with only the core safety-oriented settings
+- [CHANGELOG.md](./CHANGELOG.md)
+  Changes per release. If you are updating from v1.0, note that the profile format has changed.
 
 ## How To Use
 

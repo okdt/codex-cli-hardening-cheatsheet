@@ -23,6 +23,8 @@ English: [README.en.md](./README.en.md)
   コメント付きの `config.toml` テンプレート
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
   最小限の安全設定だけを抜き出した軽量テンプレート
+- [CHANGELOG.md](./CHANGELOG.md)
+  版ごとの変更点。v1.0 から更新する場合は、profile の書き方が変わっている点を確認してください
 
 ## How To Use
 
