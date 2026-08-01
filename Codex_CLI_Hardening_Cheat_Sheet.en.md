@@ -711,6 +711,8 @@ Codex now has a permission model that runs parallel to `sandbox_mode` and `[sand
 > - `sandbox_mode = "read-only"` plus `default_permissions = ":workspace"` → the write **succeeded**
 >
 > The second case is the dangerous one. You may believe you set `read-only` for safety, but a single leftover `default_permissions` line anywhere in the loaded configuration silently gives you `workspace-write` instead. **After experimenting with the beta, confirm that `default_permissions` and `[permissions.*]` are gone.**
+>
+> This discrepancy has been reported upstream ([openai/codex#36448](https://github.com/openai/codex/issues/36448)); which of the two is intended is still an open question there.
 
 Everything this cheatsheet has described so far remains the current, non-beta baseline. But "it does not affect me because I have not adopted the beta" is not quite true: as above, one forgotten line silently overrides that baseline.
 
