@@ -5,7 +5,9 @@ This repository provides a practical hardening cheatsheet and configuration temp
 It has two main goals:
 
 - translate general hardening practices into day-to-day Codex CLI operations
-- provide ready-to-use examples for `sandbox`, `approval`, `network`, and `history`
+- provide ready-to-use examples for `sandbox`, `approval`, `network`, `history`, and secrets handling
+
+**Secrets handling in particular is the one area where a mistake cannot be undone by fixing a setting.** Section 5 of the cheat sheet covers how to keep API keys out of `config.toml` and pass them at launch from the OS keychain or a secrets manager.
 
 This is not official OpenAI documentation. Before applying any settings in production, verify them against the Codex CLI version you are actually using and the latest official references.
 
@@ -19,6 +21,8 @@ This is not official OpenAI documentation. Before applying any settings in produ
   Commented `config.toml` template
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
   Smaller template with only the core safety-oriented settings
+- [CHANGELOG.md](./CHANGELOG.md)
+  Changes per release. If you are updating from v1.0, note that the profile format has changed.
 
 ## How To Use
 
@@ -39,10 +43,13 @@ For example:
 This repository focuses on:
 
 - Codex CLI `sandbox` settings
-- baseline `approval_policy` choices
-- how and when to enable network access
-- the tradeoffs around local history retention
+- baseline `approval_policy` choices, including `granular`
+- how and when to enable network access, and how web search pulls in external content
+- where secrets and credentials belong (OS keychain, environment-variable indirection)
+- MCP server tool allow lists
+- the tradeoffs around local history and memory retention
 - shared templates and profile-based workflows
+- organization-wide rollout via `requirements.toml`, and the beta permission profiles
 
 It is not mainly about:
 
@@ -56,11 +63,13 @@ It is not mainly about:
 - It also covers secure design principles such as human-in-the-loop, least privilege, and defense in depth
 - The shared templates prioritize clarity and operational simplicity first
 - Fine-grained approval setups should usually come after the team has a concrete need for them
-- Config keys and behavior may change across Codex CLI versions
+- Config keys and behavior change across Codex CLI versions. The current text was verified against **Codex CLI 0.146.0 as of 2026-08-01**, using both the official documentation and the running binary; where the two disagree, the text says so
 
 ## References
 
-- OpenAI Help: https://help.openai.com/en/articles/11369540/
+- Codex Configuration reference: https://developers.openai.com/codex/config-reference
+- Codex Permissions (beta): https://developers.openai.com/codex/permissions
+- Codex admin-enforced requirements: https://developers.openai.com/codex/enterprise/managed-configuration
 - OpenAI Codex config example discussion: https://github.com/openai/codex/issues/2760
 - Claude Code hardening cheatsheet by okdt: https://github.com/okdt/claude-code-hardening-cheatsheet
 
