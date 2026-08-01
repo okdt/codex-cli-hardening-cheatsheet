@@ -18,7 +18,7 @@ This is not official OpenAI documentation. Before applying any settings in produ
 - [Codex_CLI_Hardening_Cheat_Sheet.en.md](./Codex_CLI_Hardening_Cheat_Sheet.en.md)
   English version
 - [Codex_CLI_Hardening_Audit_Prompt.en.md](./Codex_CLI_Hardening_Audit_Prompt.en.md)
-  **An audit prompt to paste into Codex.** It has Codex read the cheat sheet and work through your settings one change at a time, with your approval ([Japanese](./Codex_CLI_Hardening_Audit_Prompt.ja.md))
+  **An audit prompt to paste into Codex CLI.** It has the agent read the cheat sheet and work through your settings one change at a time, with your approval ([Japanese](./Codex_CLI_Hardening_Audit_Prompt.ja.md))
 - [codex-config.hardened.template.toml](./codex-config.hardened.template.toml)
   Commented `config.toml` template
 - [codex_config_min_safe_template.toml](./codex_config_min_safe_template.toml)
