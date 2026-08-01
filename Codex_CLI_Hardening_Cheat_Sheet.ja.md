@@ -723,6 +723,8 @@ Codex には、`sandbox_mode` / `[sandbox_workspace_write]` とは別系統の�
 > - `sandbox_mode = "read-only"` ＋ `default_permissions = ":workspace"` → **書き込めてしまった**
 >
 > 危ないのは後者です。安全のために `read-only` にしたつもりでも、どこかの層に `default_permissions` が 1 行残っていれば、警告もなく `workspace-write` で動きます。**beta を試したあとは、`default_permissions` と `[permissions.*]` を消したことを確認してください。**
+>
+> この食い違いは上流に報告済みです（[openai/codex#36448](https://github.com/openai/codex/issues/36448)）。コードとドキュメントのどちらが意図された挙動かは、そちらの回答待ちです。
 
 このチートシートがここまで説明してきた設定は今も現役の既定路線です。ただし「beta に触れなければ関係ない」とは言い切れません。上のとおり、消し忘れた 1 行が既定路線を静かに上書きします。
 

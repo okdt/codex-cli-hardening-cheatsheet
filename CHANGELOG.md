@@ -16,7 +16,7 @@ Codex CLI 0.146.0 に合わせた改訂。記述は公式ドキュメントと�
 
 - **`network_access = false` は関門です。** `on-request` と組み合わせた場合、通信を要するコマンドは承認を求め、承認すれば通ります。承認ごと止めるには `never` と組み合わせます
 - **閉じても Web 検索は動きます。** `network_access` が制御するのはコマンドとその子プロセスの通信で、Web 検索は別の層を通ります
-- **`default_permissions` は `sandbox_mode` より優先されます。** 公式ドキュメントは逆に説明していますが、0.146.0 の実機では `default_permissions` が勝ちました。beta の権限プロファイルを試したあとは、消し忘れにご注意ください
+- **`default_permissions` は `sandbox_mode` より優先されます。** 公式ドキュメントは逆に説明していますが、0.146.0 の実機では `default_permissions` が勝ちました。beta の権限プロファイルを試したあとは、消し忘れにご注意ください（上流に報告済み: [openai/codex#36448](https://github.com/openai/codex/issues/36448)）
 - `trust_level` は承認の省略だけでなく、プロジェクト配下の `.codex/` 層（config・hooks・rules）の読み込みも左右します
 
 ### 扱う範囲を拡張
@@ -55,7 +55,7 @@ A revision for Codex CLI 0.146.0. The text was checked against both the official
 
 - **`network_access = false` is a checkpoint.** With `on-request`, commands that need the network ask for approval and run once approved. Pair it with `never` to remove the approval path.
 - **Web search keeps working when it is closed.** `network_access` governs commands and their subprocesses; web search goes through a separate layer.
-- **`default_permissions` takes precedence over `sandbox_mode`.** The official documentation describes the opposite, but on 0.146.0 `default_permissions` won. Worth remembering after experimenting with the beta permission profiles.
+- **`default_permissions` takes precedence over `sandbox_mode`.** The official documentation describes the opposite, but on 0.146.0 `default_permissions` won. Worth remembering after experimenting with the beta permission profiles. Reported upstream as [openai/codex#36448](https://github.com/openai/codex/issues/36448).
 - `trust_level` affects more than skipped approvals: it also decides whether a project's `.codex/` layer (config, hooks, rules) is loaded.
 
 ### Wider coverage
