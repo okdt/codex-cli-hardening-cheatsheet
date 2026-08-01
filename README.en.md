@@ -14,7 +14,7 @@ This is not official OpenAI documentation. Before applying any settings in produ
 ## Included Files
 
 - [Codex_CLI_Hardening_Cheat_Sheet.ja.md](./Codex_CLI_Hardening_Cheat_Sheet.ja.md)
-  Main Japanese cheatsheet covering hardening principles, recommended settings, and operational notes
+  Main Japanese cheat sheet covering hardening principles, recommended settings, and operational notes
 - [Codex_CLI_Hardening_Cheat_Sheet.en.md](./Codex_CLI_Hardening_Cheat_Sheet.en.md)
   English version
 - [codex-config.hardened.template.toml](./codex-config.hardened.template.toml)
@@ -26,7 +26,7 @@ This is not official OpenAI documentation. Before applying any settings in produ
 
 ## How To Use
 
-This repository is meant to work for a range of readers, from people who want a safer shared default to people who want to tune Codex CLI around a specific project or operational model.
+This repository is meant to work for a range of readers, from those who want a safer shared default to those who want to tune Codex CLI for a specific project or operational model.
 
 Start with the cheatsheet and the templates. After that, it is often useful to feed the docs back into your own Codex setup and ask what should be adjusted for your actual workflow and risk profile.
 
