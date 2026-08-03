@@ -348,7 +348,9 @@ As covered above, closing `network_access` does not stop web search: external te
 
 **Do not count this as a prompt-injection control, though.** Text planted in the results still arrives through the index, because an index is not an inspection. The official documentation limits its claim to exposure "from arbitrary live content" and says to treat results as untrusted regardless. What is closed is the fetching side, not the receiving side.
 
-**And out of the box there is no route to current information at all.** `network_access` defaults to `false` and `web_search` defaults to `cached`. The first closes command traffic and the second removes live fetching, so **a model on untouched defaults sees the workspace and whatever is already in the index, and nothing else**. Assuming that having web search means you can look up the latest is a mistake.
+**And out of the box there is no route for fetching anything yourself.** `network_access` defaults to `false` and `web_search` defaults to `cached`. The first closes command traffic and the second removes live fetching, so **a model on untouched defaults sees the workspace and whatever is already in the index, and nothing else**.
+
+How quickly that index refreshes is not published, so **there is no way from here to judge how current the answer is.** It is not that the results are old; it is that you cannot tell. Assuming that having web search means you can look up the latest is a mistake.
 
 The awkward part is that the results do not show you this. A change that has not been indexed, or a version released last week, simply does not arrive, while the search itself succeeds and returns something plausible. Fast-moving subjects are where this bites. This document exists in its current form because the profile mechanism in Codex CLI was replaced within four months, and the official documentation disagreed with the running binary at the time. **When currency matters, choose `indexed` or `live` deliberately, or keep a human in the loop.**
 
@@ -356,7 +358,7 @@ The awkward part is that the results do not show you this. A change that has not
 
 **For development work, pick `indexed`.** Page content comes through, so research actually works. With the default `cached` you hit a dead end partway through a lookup and reach for `live` in the middle of the job. **A setting you will loosen while working is not a setting to start from.**
 
-**What `indexed` rules out is carrying internal data out in a parameter.** That is the shape an injected instruction usually takes at the end:
+**What `indexed` gets in the way of is carrying internal data out in a parameter.** That is the shape an injected instruction usually takes at the end:
 
 ```
 (planted in some external text)
@@ -368,6 +370,8 @@ No attacker can prepare that URL in advance, because the value is not known unti
 **The matching is per URL.** On 0.146.0 an indexed page opens normally, but adding one query string that cannot have been indexed — same host, same path — fails with `DisabledError`. The same URL opens under `live`, so it is the mode refusing, not the URL being unreachable.
 
 Were the matching per host, data could leave as a parameter on an already-indexed host. That it is not is where the value of this setting sits.
+
+**Do not count it as a control that closes exfiltration, though.** The matching happens at OpenAI's end; the CLI only passes flags. What we checked is one shape, a freshly constructed URL with a query string being refused. Paths, fragments, encodings, redirects, and encoding data in the choice among indexed URLs are all unexamined, and the decision can change on their side. MCP, hooks, and approved commands sit outside this setting entirely (sections 3, 6, 10). **`indexed` lowers the odds of an exfiltration succeeding; it does not reduce the number of routes.**
 
 Read the other way: **`indexed` does not prevent injection.** Planted text still arrives as search results. What stops is the step where the instruction turns into an exfiltration.
 
