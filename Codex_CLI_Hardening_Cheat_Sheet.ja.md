@@ -371,15 +371,6 @@ enabled = true
 
 **照合は URL 単位です。** 検証したところ、索引済みのページ（`https://developers.openai.com/codex/`）はそのまま開けますが、ホストもパスも同じまま、索引されようのないクエリを一つ足すと `DisabledError` で弾かれます。同じ URL は `live` では開けるので、URL そのものが取得不能なのではなく、モードが拒んでいます。
 
-```
-web_search = "indexed"
-  https://developers.openai.com/codex/                    → 取得できる
-  https://developers.openai.com/codex/?probe=<一意な文字列> → Failed ... DisabledError
-
-web_search = "live"
-  https://developers.openai.com/codex/?probe=<一意な文字列> → 取得できる
-```
-
 ホスト単位の照合であれば、索引済みホストにパラメータを付けて持ち出せてしまいます。そうなっていないことが、この設定の値打ちです。
 
 裏返すと、**`indexed` はインジェクションを防ぎません。** 仕込まれたテキストは検索結果として届きます。止まるのは、届いた指示にしたがって持ち出すところ、ということになります。
