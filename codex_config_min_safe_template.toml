@@ -19,12 +19,13 @@ sandbox_mode = "workspace-write"
 # Hardening option: avoid inheriting login-shell startup behavior.
 allow_login_shell = false
 
-# "cached" is the default and returns pre-indexed results rather than fetching
-# live pages. That closes the fetching side, not the receiving side: text planted
-# in the results still arrives, so treat them as untrusted either way. Use "live"
-# deliberately; note that --yolo and other full-access settings promote it to
-# "live", and that "indexed" opens external access rather than closing it.
-web_search = "cached"
+# "indexed" fetches live but only from URLs already in the index, so ordinary
+# research works while a destination invented on the spot stays unreachable. The
+# default, "cached", fetches no pages at all and ends a lookup partway. Note
+# that neither setting filters what the results say: treat them as untrusted
+# either way. Use "live" deliberately, and note that --yolo and other full-access
+# settings promote this to "live" on their own.
+web_search = "indexed"
 
 # Store credentials in the OS keychain instead of a plaintext auth.json.
 # The CLI store defaults to "file"; MCP OAuth defaults to "auto".
