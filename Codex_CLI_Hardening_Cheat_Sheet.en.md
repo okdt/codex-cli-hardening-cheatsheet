@@ -399,8 +399,6 @@ web_search = "indexed"     # for development; fetches limited to indexed URLs
 # web_search = "disabled"  # when nothing external should be read at all
 ```
 
-**Do not confirm the setting by checking whether a fetch worked.** Under `cached`, a URL carrying a query string that cannot be in any index still comes back as a success. The likely explanation is a cache hit on the URL with the query dropped, but nothing about the result tells you that. Where `indexed` answers with `DisabledError`, **`cached` answers with the appearance of having worked.** Confirm from the setting itself instead (see section 9 on `codex exec --strict-config`).
-
 If pages you need keep failing to open, moving up to `live` is the call — record why when you do.
 
 With that settled, two things are worth watching:

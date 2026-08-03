@@ -4,10 +4,11 @@
 # Same posture as codex_config_min_safe_template.toml, with web search also
 # closed. This is for work that must not read anything external, and closing it
 # removes ordinary research. If that is not the work at hand, use
-# codex_config_min_safe_template.toml, which keeps the default "cached".
+# codex_config_min_safe_template.toml, which sets "indexed" so that looking
+# things up still works.
 # min_safe 版と同じ姿勢に、Web 検索の遮断を加えたもの。外部を一切読ませたくない
-# 作業向けで、閉じると通常の調べ物はできなくなる。そうでなければ、デフォルトの
-# "cached" を保つ codex_config_min_safe_template.toml を使う。
+# 作業向けで、閉じると通常の調べ物はできなくなる。そうでなければ、調べ物が成立する
+# "indexed" を採る codex_config_min_safe_template.toml のほうを使う。
 #
 # Design goals:
 # 設計方針:
