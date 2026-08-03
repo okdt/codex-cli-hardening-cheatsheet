@@ -2,11 +2,12 @@
 # Codex CLI 向けの、安全寄りな共通デフォルト（注釈つき）。
 #
 # Same posture as codex_config_min_safe_template.toml, with web search also
-# closed. Note that closing web search removes ordinary research; leave it at
-# the default "cached" unless the work must not read anything external.
-# min_safe 版と同じ姿勢に、Web 検索の遮断を加えたもの。ただし Web 検索を閉じると
-# 通常の調べ物ができなくなる。外部を一切読ませたくない作業でなければ、デフォルトの
-# "cached" のままでよい。
+# closed. This is for work that must not read anything external, and closing it
+# removes ordinary research. If that is not the work at hand, use
+# codex_config_min_safe_template.toml, which keeps the default "cached".
+# min_safe 版と同じ姿勢に、Web 検索の遮断を加えたもの。外部を一切読ませたくない
+# 作業向けで、閉じると通常の調べ物はできなくなる。そうでなければ、デフォルトの
+# "cached" を保つ codex_config_min_safe_template.toml を使う。
 #
 # Design goals:
 # 設計方針:
@@ -28,9 +29,9 @@ allow_login_shell = false
 model_reasoning_effort = "medium"
 
 # Web search defaults to "cached", so external text reaches the model even with
-# the network closed. Open it only when you want research.
+# the network closed. This template closes that route as well.
 # web_search のデフォルトは "cached"。ネットワークを閉じても外部テキストは届くので、
-# 調べ物をさせたい時だけ開ける。
+# このテンプレートではその経路も閉じる。
 web_search = "disabled"
 
 # Keep credentials in the OS keychain rather than a plaintext auth.json.

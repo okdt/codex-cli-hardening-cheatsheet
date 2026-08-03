@@ -341,14 +341,16 @@ As covered above, closing `network_access` does not stop web search: external te
 
 - `disabled`: no search
 - `cached` (default): returns results from an OpenAI-maintained index instead of fetching live pages
-- `indexed`: gates external access through the search index
+- `indexed`: allows external access but gates it through the search index (looser than `cached`)
 - `live`: fetches the actual page at request time (same as `--search`)
 
-**The default, `cached`, is fine to keep.** Because it serves pre-indexed results rather than arbitrary live pages, it reduces prompt-injection exposure — the official documentation makes the same point. Being able to look things up while keeping that exposure low is a genuinely good trade, and it is where the balance currently sits.
+**The default, `cached`, is fine to keep.** It serves pre-indexed results and does not fetch live pages (`external_web_access = false` in the implementation). That closes the route where the model opens an arbitrary page, so exfiltration through such a fetch, and content aimed at the agent at the moment of fetching, do not arrive.
+
+**Do not count this as a prompt-injection control, though.** Text planted in the results still arrives through the index, because an index is not an inspection. The official documentation limits its claim to exposure "from arbitrary live content" and says to treat results as untrusted regardless. What is closed is the fetching side, not the receiving side.
 
 Two things are worth watching instead:
 
-- **`live` is a deliberate choice.** It reads arbitrary pages at request time, so the mitigation in `cached` no longer applies
+- **`live` is a deliberate choice.** It reads arbitrary pages at request time, which opens the fetching route that `cached` kept closed
 - **`--yolo` and other full-access settings promote web search to `live` automatically.** Loosening the sandbox quietly loosens content ingestion too — a combination that surprises people
 
 ```toml
@@ -358,7 +360,7 @@ web_search = "cached"      # default; usually leave it here
 # web_search = "disabled"  # when nothing external should be read at all
 ```
 
-At every setting, treat search results as **untrusted input**. `cached` lowers the exposure; it does not remove it.
+At every setting, treat search results as **untrusted input**. What `cached` reduces is the fetching route, not the text the model is made to read.
 
 `features.web_search`, `features.web_search_cached`, and `features.web_search_request` are deprecated legacy toggles. Use the top-level `web_search` setting.
 
@@ -624,7 +626,7 @@ Put this in `~/.codex/config.toml`. **The target is convenient but safe.** Editi
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 allow_login_shell = false
-web_search = "cached"          # pre-indexed results, less exposure than live
+web_search = "cached"          # default; pre-indexed results, no live page fetches
 
 # Keep credentials in the OS keychain rather than a plaintext auth.json
 # Writing this does not migrate anything; finish with a fresh login (section 5)
@@ -708,7 +710,7 @@ Some work needs more than the default above. **The places to change are known.**
 |---|---|---|
 | Outbound traffic from sandboxed commands, with no approval path | `network_access = false` plus `approval_policy = "never"` | Approvals no longer help either; npm / git simply fail. Web search, MCP, and hooks need closing separately |
 | Reaching the wrong destinations without prompts | Domain rules (`features.network_proxy`) | Experimental; more configuration to maintain |
-| Ingesting external text | `web_search = "indexed"` or `"disabled"` | Weaker research results |
+| Ingesting external text | `web_search = "disabled"` (`"indexed"` opens external access, so it is not a tightening step) | No more looking things up |
 | Operations inside the workspace too | `approval_policy = "untrusted"` | Frequent prompts; heavy for daily use |
 | Specific categories of action | `approval_policy` as granular with those entries `false` | Quiet failures; you must record what you closed |
 | Destructive commands | `forbidden` rules in execpolicy | Preview feature; rules need maintenance |

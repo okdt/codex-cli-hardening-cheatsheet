@@ -20,8 +20,10 @@ sandbox_mode = "workspace-write"
 allow_login_shell = false
 
 # "cached" is the default and returns pre-indexed results rather than fetching
-# live pages, which reduces prompt-injection exposure. Use "live" deliberately;
-# note that --yolo and other full-access settings promote it to "live".
+# live pages. That closes the fetching side, not the receiving side: text planted
+# in the results still arrives, so treat them as untrusted either way. Use "live"
+# deliberately; note that --yolo and other full-access settings promote it to
+# "live", and that "indexed" opens external access rather than closing it.
 web_search = "cached"
 
 # Store credentials in the OS keychain instead of a plaintext auth.json.
