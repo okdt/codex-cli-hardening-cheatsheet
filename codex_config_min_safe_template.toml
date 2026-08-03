@@ -19,18 +19,31 @@ sandbox_mode = "workspace-write"
 # Hardening option: avoid inheriting login-shell startup behavior.
 allow_login_shell = false
 
-# "cached" is the default and returns pre-indexed results rather than fetching
-# live pages, which reduces prompt-injection exposure. Use "live" deliberately;
-# note that --yolo and other full-access settings promote it to "live".
-web_search = "cached"
+# "indexed" fetches live but only from URLs already in the index, so ordinary
+# research works while a destination invented on the spot stays unreachable. The
+# default, "cached", fetches no pages at all and ends a lookup partway. Note
+# that neither setting filters what the results say: treat them as untrusted
+# either way. Use "live" deliberately, and note that --yolo and other full-access
+# settings promote this to "live" on their own.
+web_search = "indexed"
 
 # Store credentials in the OS keychain instead of a plaintext auth.json.
+# The CLI store defaults to "file"; MCP OAuth defaults to "auto".
+# Setting these lines does NOT migrate anything: log in again, confirm
+# `codex login status`, then check that auth.json is gone.
 cli_auth_credentials_store = "keyring"
 mcp_oauth_credentials_store = "keyring"
 
+[analytics]
+# Usage metrics are sent unless this is set. Metrics go out even when logged out.
+enabled = false
+
 [history]
-# Persist session transcripts for day-to-day usability.
+# Persist input history for day-to-day usability.
 # If prompts or work context may contain sensitive data, switch this to "none".
+# NOTE: this only controls history.jsonl. Full session transcripts are written to
+# $CODEX_HOME/sessions/ by a separate mechanism that has no off switch. Use
+# `codex exec --ephemeral` for non-interactive work, or `codex delete <ID>` after.
 persistence = "save-all"
 
 [sandbox_workspace_write]
@@ -51,9 +64,14 @@ writable_roots = []
 
 [shell_environment_policy]
 # Limit what of your environment is inherited by spawned commands.
-# Variables containing KEY / SECRET / TOKEN are excluded by default;
-# do not set ignore_default_excludes = true without understanding it.
+# The defaults are NOT safe: inherit defaults to "all" and
+# ignore_default_excludes defaults to true (i.e. no name-based filtering).
+# The name filter only covers *KEY* / *SECRET* / *TOKEN*, so PGPASSWORD and
+# DATABASE_URL pass through. It is a fallback, not the main protection.
+# allow_login_shell = false above matters here too: a login shell loads a
+# snapshot of the full Codex environment that this policy does not filter.
 inherit = "core"
+ignore_default_excludes = false
 
 # Profiles are one file each: $CODEX_HOME/<name>.config.toml, selected with
 # `codex --profile <name>` and layered over this file. Because a profile file is
@@ -94,6 +112,10 @@ inherit = "core"
 #   and [approval_policy.granular] cannot both appear. Use one or the other.
 # - Never write secret values here. Point at an environment variable instead
 #   (for example mcp_servers.<id>.bearer_token_env_var) and inject it at launch.
+# - Do not export secrets into the shell you start Codex from. hooks and notify
+#   run outside shell_environment_policy and inherit the Codex environment.
+# - Treat $CODEX_HOME as a secrets directory: `chmod 700 ~/.codex`. Sessions and
+#   shell snapshots are not created with a fixed restrictive mode.
 # - Verify the result: `codex sandbox --log-denials -- <command>` (macOS).
 # - The beta permission profiles (default_permissions / [permissions.*]) do NOT
 #   combine with sandbox_mode / [sandbox_workspace_write]. Pick one model.
