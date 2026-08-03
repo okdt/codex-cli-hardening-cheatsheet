@@ -8,3 +8,14 @@
 
 # local working notes
 PROGRESS.md
+_*.md
+
+# Do not ship files that load into a reader's session or override their config.
+# AGENTS.md and CLAUDE.md are read automatically by the agent in whatever
+# directory it starts in, so committing ours would apply our working rules to
+# theirs. A .codex/ directory is worse: project config takes precedence over the
+# user's own once the repository is trusted.
+AGENTS.md
+CLAUDE.md
+.claude/
+.codex/
