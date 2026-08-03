@@ -6,11 +6,11 @@ Codex CLI はファイルの読み書き、シェルコマンド実行、設定�
 
 急ぐ方は、「導入の仕方」の Quick Start をそのまま `~/.codex/config.toml` に置いてください。それだけでも効きます。なぜその値なのかを知りたい方は、通して読んでください。
 
-**この文書ごと Codex に読ませて、手元の `config.toml` を調整させる**のも有効な使い方です。そのために、設定キーと既定値、そして「なぜその値か」の根拠を、いずれも省略せずに書いてあります。用途を伝えたうえで相談すれば、あなたの環境に合わせた形に落としてくれます。
+**この文書ごと Codex に読ませて、手元の `config.toml` を調整させる**のも有効な使い方です。そのために、設定キーとデフォルト値、そして「なぜその値か」の根拠を、いずれも省略せずに書いてあります。用途を伝えたうえで相談すれば、あなたの環境に合わせた形に落としてくれます。
 
 そのまま貼り付けて使えるプロンプトを同梱しています → [Codex_CLI_Hardening_Audit_Prompt.ja.md](./Codex_CLI_Hardening_Audit_Prompt.ja.md)
 
-> **検証環境:** Codex CLI 0.146.0（2026-08-01 時点）。設定キーと挙動は版によって変わります。本文の記述は、公式ドキュメントと実機の双方で確認しています。両者が食い違う箇所は、その旨を明記しました。
+> **検証環境:** Codex CLI 0.146.0（2026-08-03 時点）。設定キーと挙動は版によって変わります。本文の記述は、公式ドキュメント・公開ソース・実機の挙動を突き合わせて確認しています。公式ドキュメントと実機が食い違う箇所があったため、公式の記述だけを根拠にはしていません。食い違いはその旨を明記しました。「0.146.0 で確認」と書いた箇所は、この版の実装で裏を取ったものです。版が上がったら、まずそこを確かめ直してください。
 
 ## リスク — なぜハードニング（セキュリティ堅牢化）設定が必要なのか
 
@@ -39,7 +39,7 @@ Codex CLI はファイルの読み書き、シェルコマンド実行、設定�
 
 1. **サンドボックス化** — `sandbox_mode` で、AI がファイルシステムのどこまで書き込めるかを制御します。`workspace-write` ならワークスペース内だけ、`read-only` なら一切書けません。これは OS レベルの制約なので、AI 側から迂回できません。もっとも硬い防御層です。
 2. **承認ポリシー** — `approval_policy` で、sandbox 境界を超える操作に人間の承認を挟むかどうかを決めます。`on-request` にしておけば、想定外の操作で止まります。Human-In-The-Loop の実装です。
-3. **ネットワーク制限** — `network_access` で、外部通信を許すかどうかを決めます。sandbox 配下の設定ですが、独立した防御層として機能します。閉じておけば、間接的プロンプトインジェクションで誘導された操作も、外部に到達しません。
+3. **ネットワーク制限** — `network_access` で、サンドボックス内で動くコマンドとその子プロセスの外向き通信を許すかどうかを決めます。sandbox 配下の設定ですが、独立した防御層として機能します。閉じておけば、間接的プロンプトインジェクションで誘導されたコマンドは、そこから外へ出られません。Codex 全体の通信を止める設定ではないので、Web 検索・MCP・hooks は別に評価してください（§3・§6・§10）。
 4. **シークレットの扱い** — API キーやトークンを、設定ファイルに書かずに渡します。ここだけは「設定を締める」話ではなく「値をどこに置くか」の話で、他の軸とは種類が違います。そして漏れたときの取り返しがつかない度合いも違います。
 5. **履歴保存の制限** — `history.persistence` で、セッション履歴をどこまで残すかを決めます。利便性と情報残留のトレードオフです。
 6. **ログ履歴** — ここはエンタープライズ現場や、この仕組み自体のデバッグで必要になるかもしれません。Codex CLI は OpenTelemetry 統合とセッション rollout を持っており、公式ドキュメントで目立つ扱いではないものの、実は相当充実しています。詳細は後述します。
@@ -50,7 +50,7 @@ Codex CLI はファイルの読み書き、シェルコマンド実行、設定�
 
 ### instruction系ファイルに書いておけば？ NO.
 
-Codex CLI でコンテキストを記録するには、`AGENTS.md` のようなプロジェクト向けコンテキストファイルや、`~/.codex/instructions.md` のようなユーザ向け指示ファイル、`SKILL.md` のような補助的な定義ファイルがあります。ここではこれらをまとめて **instruction 系ファイル** と呼びます。それぞれ意図やスコープは異なりますが、共通してコンテキストや作業方針を与えるためのものです。
+Codex CLI でコンテキストを記録するには、`AGENTS.md` のようなプロジェクト向けコンテキストファイルや、`~/.codex/AGENTS.md`（一時的に上書きするなら `~/.codex/AGENTS.override.md`）のようなユーザ向け指示ファイル、`SKILL.md` のような補助的な定義ファイルがあります。ここではこれらをまとめて **instruction 系ファイル** と呼びます。それぞれ意図やスコープは異なりますが、共通してコンテキストや作業方針を与えるためのものです。
 
 ただ、これらは結局のところユーザプロンプトにすぎません。次のような制御を instruction 系ファイルだけに頼るのは危険です。
 
@@ -61,7 +61,7 @@ Codex CLI でコンテキストを記録するには、`AGENTS.md` のような�
 
 こうした制御は `config.toml` の sandbox / approval / network 側で担保し、instruction 系ファイルは補助説明に留める。この分担が安全です。
 
-サイズの面でも向いていません。instruction 系ファイルには上限があり、OpenAI の公式情報では既定で 32 KB とされています（設定で変更はできます）。運用マニュアルのように育てる置き場所ではない、ということです。
+サイズの面でも向いていません。instruction 系ファイルには上限があり、OpenAI の公式情報ではデフォルトで 32 KB とされています（設定で変更はできます）。運用マニュアルのように育てる置き場所ではない、ということです。
 
 **「起きてほしくないこと」は、お願いではなくポリシーとして強制する。** ではどうすればいいのか。そこがこのドキュメントの出発点です。
 
@@ -92,8 +92,9 @@ Codex CLI では、次の設定がこれに対応します。
 
 - `sandbox_mode = "workspace-write"`
 - `writable_roots = []`
-- `network_access = false`（既定値のまま）
+- `network_access = false`
 - `allow_login_shell = false`
+- `inherit = "core"`（`shell_environment_policy`。デフォルトは全継承です）
 
 必要な時だけ `--add-dir` や profile で例外を与える方が、安全性と実用性の両立がしやすくなります。
 
@@ -103,7 +104,7 @@ Codex CLI では、次の設定がこれに対応します。
 
 セキュリティの世界では「単一障害点(single point of failure)を作らない」とよく言います。設定も同じで、サンドボックスだけに頼っていると、その設定を一つ間違えただけで全部が崩れます。
 
-sandbox / approval / network / history の 4 軸を重ねるのは、この考え方の実装です。サンドボックスの設定が甘くても、承認で止まる。承認をうっかり通しても、ネットワークが閉じていれば外部への影響は出ない。そういう重なりを作ります。
+sandbox / approval / network / history の 4 軸を重ねるのは、この考え方の実装です。サンドボックスの設定が甘くても、承認で止まる。承認をうっかり通しても、ネットワークが閉じていればそのコマンドは外へ出られない。そういう重なりを作ります。
 
 ### 承認は、少ないほど効く
 
@@ -148,7 +149,8 @@ writable_roots = []
 ```
 
 - `writable_roots = []` は追加書き込み先を増やさない安全な初期値。ここにディレクトリを追加するほど、AI が書き込める範囲が広がります
-- `/tmp` や `$TMPDIR` を writable root に含めると、一時ファイル経由で sandbox 外にデータを受け渡す経路ができてしまいます
+- `/tmp` や `$TMPDIR` はワークスペースの外にある共有の場所です。サンドボックスの外で動くプログラムが読みにくるもの——ソケット、ロックファイル、シンボリックリンク——が集まり、書いた内容はセッションやプロジェクトを越えて残ります。外しても普段の作業はほとんど妨げられません（`TMPDIR` / `TEMP` / `TMP` は後述の `inherit = "core"` でも子プロセスへ渡ります）。詰まるのは `$TMPDIR` 配下へ実際に書くツールだけで、書き込み拒否のエラーとして現れるので、その起動だけ `--add-dir` で足せます。摩擦がほとんどないなら、締めておく側に倒します
+- 信頼境界の異なるプログラムが同居する環境——複数ユーザの共有ホスト、CI ランナー、コンテナ、別のエージェントが動いている端末——では、`/tmp` に置いたものが誰から見えるかを確認してください
 - 追加ディレクトリが必要な時は `--add-dir /path/to/dir` で一時的に足す方が、設定を恒久的に広げるより安全です
 - `allow_login_shell = false` にしておくと、`.bashrc` や `.zshrc` に書かれたエイリアスや PATH 変更が意図せず AI の行動に影響するのを防げます。シェル初期化への依存を減らすことで再現性も上がります
 
@@ -189,6 +191,7 @@ approval_policy = "on-request"
 - 共通テンプレートに granular 設定まで入れなくてよい
 - high-risk action に human-in-the-loop を入れるという意味で、[OWASP の AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html) が推奨する方針とも一致します
 - `[projects."<パス>"]` の `trust_level` は、承認を省略するだけの設定ではありません。`"untrusted"` にすると、そのプロジェクト配下の `.codex/` 層——プロジェクト固有の config、hooks、rules——がまるごと読み込まれなくなります。裏を返せば `"trusted"` は「このリポジトリが持ち込む設定・フック・ルールを実行してよい」と宣言することです。他人のリポジトリを開くときに効いてくるのは、承認の省略よりむしろこちらの側面です
+- しかも、プロジェクト層のほうが優先されます。設定レイヤーの優先度は user より project が上なので（0.146.0 で確認）、trusted にしたリポジトリの `.codex/config.toml` は、あなたが `~/.codex/config.toml` に書いた `sandbox_mode` や `approval_policy` や `allow_login_shell` を上書きできます。trust は「承認を省く」宣言ではなく、**そのリポジトリに設定の優先権を渡す**宣言です。trusted にする前に、そのリポジトリの `.codex/config.toml` を読んでください。組織として上限を決めたいなら、ユーザー設定より強い層である `requirements.toml`（後述）で縛ります
 
 **granular — 承認の種類ごとに決める:**
 
@@ -221,18 +224,20 @@ prefix_rule(
 )
 ```
 
+**このファイルには、あなたが承認した内容が書き込まれることがあります。** 承認ダイアログで永続化にあたる選択——コマンドの許可ルールの追加、ネットワークルールの永続化——をすると、`$CODEX_HOME/rules/default.rules` に追記されます（0.146.0 で確認）。素の承認とセッション限りの承認は追記されません。つまり、その場をしのぐつもりの一度の承認が、恒久的な許可として残ることがあります。一時的に許可を出した前後で、このファイルの差分を確認してください。意図して永続化を選んだのでなければ、検証後に削除します。
+
 現時点ではシェルコマンドのプレフィックスマッチが対象で、Claude Code の `Read(**/.env)` のようなファイル操作単位のルールはありません。`config.toml` で `approval_policy` を granular にし `rules = true` にすると `prompt` ルールが有効になります。現時点では[プレビュー扱い](https://github.com/openai/codex/blob/main/codex-rs/execpolicy/README.md)のため、API に破壊的変更が入る可能性があります。詳細は [Rules / execpolicy](https://developers.openai.com/codex/rules) を参照してください。
 
 ### 3. ネットワーク制限
 
-ネットワークは sandbox 配下の設定ですが、他の sandbox 設定とは独立して判断・設定することができます。**`network_access` の既定値は `false`** で、公式も「`workspace-write` の既定はネットワークを無効のままにする」と明記しています。つまり何も書かなければ、外向き通信は閉じた状態から始まります。
+ネットワークは sandbox 配下の設定ですが、他の sandbox 設定とは独立して判断・設定することができます。**`network_access` のデフォルト値は `false`** で、公式も「`workspace-write` のデフォルトはネットワークを無効のままにする」と明記しています。つまり何も書かなければ、外向き通信は閉じた状態から始まります。
 
 ```toml
 # ~/.codex/config.toml
 sandbox_mode = "workspace-write"   # この前提で ↓ が効く
 
 [sandbox_workspace_write]
-network_access = false   # 既定値。閉じた状態を出発点にする
+network_access = false   # デフォルト値。閉じた状態を出発点にする
 ```
 
 閉じたままを共通デフォルトにする。これが本チートシートの推奨です。
@@ -282,7 +287,7 @@ writable_roots = []
 
 **ドメイン単位で絞る（experimental）:**
 
-`features.network_proxy` を有効にすると、外向き通信をプロキシ経由にして、ドメイン単位の allow / deny を書けます。現時点では experimental で、既定は無効です。
+`features.network_proxy` を有効にすると、外向き通信をプロキシ経由にして、ドメイン単位の allow / deny を書けます。現時点では experimental で、デフォルトは無効です。
 
 実務上の要点はここです。**ドメインルールは承認を発生させません。** 許可した宛先は素通り、拒否した宛先はその場で失敗する。人間に尋ねるのではなく、ポリシーとして評価されます。
 
@@ -328,11 +333,11 @@ enabled = true
 
 | 構成 | 承認の発生 | 遮断 |
 |---|---|---|
-| `false` ＋ `on-request`（**本チートシートの既定**） | npm / git のたびに出る | 承認すれば通る |
+| `false` ＋ `on-request`（**本チートシートのデフォルト**） | npm / git のたびに出る | 承認すれば通る |
 | `false` ＋ `never` | 出ない | 通らない（完全遮断） |
 | `true` ＋ ドメインルール | 出ない | 許可した宛先だけ通る |
 
-なお、これは experimental の機能で、既定は無効です。安定性を要する環境では、まず `false` ＋ `on-request` で運用してください。
+なお、これは experimental の機能で、デフォルトは無効です。安定性を要する環境では、まず `false` ＋ `on-request` で運用してください。
 
 ### 4. Web 検索と外部コンテンツ
 
@@ -343,7 +348,7 @@ enabled = true
 - `indexed`: 外部アクセスを検索インデックス経由に限定する
 - `live`: その場で実ページを取りに行く（`--search` と同じ）
 
-**既定の `cached` は、そのまま使ってよい設定です。** 事前に索引された結果を返すので、任意のライブページを読み込む場合に比べてプロンプトインジェクションの露出が小さくなります。公式も同じ説明をしています。調べ物ができることと露出の小ささが両立している、今のところの落としどころです。
+**デフォルトの `cached` は、そのまま使ってよい設定です。** 事前に索引された結果を返すので、任意のライブページを読み込む場合に比べてプロンプトインジェクションの露出が小さくなります。公式も同じ説明をしています。調べ物ができることと露出の小ささが両立している、今のところの落としどころです。
 
 意識すべきなのは次の 2 点です。
 
@@ -352,7 +357,7 @@ enabled = true
 
 ```toml
 # ~/.codex/config.toml
-web_search = "cached"      # 既定。ふつうはこのまま
+web_search = "cached"      # デフォルト。ふつうはこのまま
 # web_search = "indexed"   # 外部アクセスを索引経由に絞りたいとき
 # web_search = "disabled"  # 外部を一切読ませたくないとき
 ```
@@ -369,15 +374,24 @@ web_search = "cached"      # 既定。ふつうはこのまま
 
 **(1) Codex 自身の資格情報をどこに置くか**
 
-Codex はログイン情報を、既定（`auto`）ではファイル（`auth.json`）か OS キーチェーンのどちらかに保存します。キーチェーンへ明示的に寄せられます。
+Codex CLI のログイン情報は、**デフォルトではファイル（`auth.json`）に保存されます。** `keyring` を選べば OS キーチェーンへ寄せられます。MCP の OAuth 情報だけはデフォルトが `auto`（キーチェーンが使えればそちら、駄目ならファイル）で、CLI 側とは別のキーです。
 
 ```toml
 # ~/.codex/config.toml
-cli_auth_credentials_store = "keyring"    # file | keyring | auto
-mcp_oauth_credentials_store = "keyring"   # auto | file | keyring
+cli_auth_credentials_store = "keyring"    # file（デフォルト）| keyring | auto
+mcp_oauth_credentials_store = "keyring"   # auto（デフォルト）| file | keyring
 ```
 
 道具を増やさずに、平文でディスクに残る資格情報を一つ減らせます。個人の端末ならまずこれで十分です。ホームディレクトリをクラウド同期している場合はとくに効きます——平文の `auth.json` は、置いた瞬間に同期先へ複製されるからです。
+
+**この行を書いただけでは移行しません。** 保存先が変わるだけなので、既存の `auth.json` はそのまま残り、キーチェーンには何も入っていない状態になります。再ログインまで済ませてください。
+
+1. `cli_auth_credentials_store = "keyring"` を書く
+2. `codex login` を実行する。ログインは開始時に既存の資格情報を先に消すので、**途中でやめると未ログイン状態になります。** 最後まで進めてください
+3. `codex login status` で認証できることを確認する
+4. `auth.json` が残っていないことを、値を表示せずに確認する
+
+キーチェーンへの保存に成功した時点で `auth.json` は削除されますが、削除に失敗しても警告だけでログインは成功します（0.146.0 で確認）。だから 4 の確認は自分で行ってください。
 
 **(2) あなたの API キーをどう渡すか**
 
@@ -417,14 +431,34 @@ X-Api-Key = "EXAMPLE_API_KEY"                # ヘッダの中身も環境変数
 
 Codex はシェルコマンドを子プロセスとして起動します。あなたの環境変数がどこまで引き継がれるかは `shell_environment_policy` で決まります。
 
+**このデフォルトは安全側ではありません。** 0.146.0 では `inherit` のデフォルトが `all`、`ignore_default_excludes` のデフォルトが `true`（＝名前による除外を適用しない）です。つまり何も書かなければ、あなたの環境変数はすべて子プロセスへ渡ります。
+
 ```toml
 # ~/.codex/config.toml
+allow_login_shell = false             # 下記の再注入を止める
+
 [shell_environment_policy]
-inherit = "core"                      # all | core | none
-exclude = ["*_TOKEN", "*_SECRET"]
+inherit = "core"                      # all（デフォルト）| core | none
+ignore_default_excludes = false       # デフォルトは true ＝除外なし
 ```
 
-既定では、名前に `KEY` / `SECRET` / `TOKEN` を含む変数は除外されます。`ignore_default_excludes = true` は**その保護を外す**設定なので、意味を理解せずに有効化しないでください。通す変数を明示的な許可リストにしたい場合は `include_only` を使います。
+`inherit = "core"` は、渡す変数を `PATH` / `HOME` / `SHELL` / `TMPDIR` などの固定リストに絞ります。`ignore_default_excludes = false` は名前による除外を有効にしますが、**対象は `*KEY*` / `*SECRET*` / `*TOKEN*` の 3 パターンだけ**です。`PGPASSWORD` や `DATABASE_URL` は素通りするので、これを万能の保護と考えないでください。`core` にしている限りこの行は効きませんが、あとで `inherit` を緩めたときに残る保険として書いておきます。
+
+**`allow_login_shell = false` が要るのは、迂回路があるからです。** login shell が許可されていると、Codex はコマンドを login shell として起動し、その前にシェル環境のスナップショットを読み込みます。このスナップショットは Codex 自身の環境を丸ごと写したもので、`shell_environment_policy` のフィルタが掛かりません（0.146.0 で確認）。`inherit = "core"` で絞っても、この経路で元に戻ります。`false` にすると login shell にならないので、読み込み自体が起きません。
+
+スナップショットのファイルは `$CODEX_HOME/shell_snapshots/` に平文で作られ、正常に終了すれば消えます。クラッシュや強制終了では残るので、機微な環境で異常終了したあとは中身を確認してください。生成そのものを止めるなら `[features] shell_snapshot = false` を指定します（0.146.0 で存在を確認したキーです。シェル関数やエイリアスの引き継ぎを失う代償があります）。
+
+**そして、この設定で塞げない経路が二つあります。** hooks と `notify` は、`shell_environment_policy` の外で、Codex の環境をそのまま受け取って実行されます（0.146.0 で確認）。
+
+だから、いちばん確実なのは設定ではなく運び方です。**Codex を起動するシェルに、不要なシークレットを `export` しない。** MCP など Codex 自身が読む必要のある変数だけを、起動時に注入してください（§5 (2) の受け口）。継承を広く保つ必要がある場合だけ、`filters` で名前を落とします。
+
+```toml
+[shell_environment_policy.filters]
+"*PASSWORD*" = "exclude"
+"*CREDENTIAL*" = "exclude"
+```
+
+`filters` は旧来の `exclude` / `include_only` と併記できません（併記するとエラーになります）。パターンは正規表現ではなく `*` / `?` のワイルドカードで、大文字小文字を区別しません。`include` を一つでも書くと許可リストとして動き、`exclude` で落ちた変数は復活しません。
 
 ### 6. MCP サーバ
 
@@ -451,16 +485,19 @@ default_tools_approval_mode = "prompt"
 
 履歴保存は便利です。ただ、何が残るのかは意識しておいてください。
 
-セッション履歴に含まれるのは、あなたが入力したプロンプト、AI の応答、実行されたコマンドとその結果。つまり、作業中に触れた情報がそのまま残ります。API キーの断片、接続先のホスト名、障害調査のメモ、内部 URL、顧客固有の識別子。後から見返すと、思っていたより多くのことが書かれているものです。
+端末に残るのは、あなたが入力したプロンプト、AI の応答、実行されたコマンドとその結果。つまり、作業中に触れた情報がそのまま残ります。API キーの断片、接続先のホスト名、障害調査のメモ、内部 URL、顧客固有の識別子。後から見返すと、思っていたより多くのことが書かれているものです。
+
+**残り方は二系統に分かれています。** この節で扱う入力履歴（`history.jsonl`）と、§8 で扱うセッション全文（`sessions/`）です。設定で止められるのは前者だけなので、両方を読んでください。
 
 ```toml
 # ~/.codex/config.toml
 [history]
-persistence = "save-all"   # default
+persistence = "save-all"   # デフォルト
 ```
 
 - 日常の振り返りや継続作業には履歴保存が有用
 - 機密性を優先したい場合は `persistence = "none"` に切り替える
+- **ただし `persistence` が止めるのは入力履歴（`history.jsonl`）だけです。** セッション全文は別の仕組みで `~/.codex/sessions/` に保存され、この設定では止まりません。§8 を必ず読んでください
 - `max_bytes` を指定すると、履歴ファイルの上限を決めて古いものから落とせます
 - 共有端末や業務環境では、誰がその履歴を読めるかを確認しておくこと
 - agent 的な運用（自動実行の繰り返し）では、履歴の蓄積自体が情報漏えい面になりうる
@@ -469,7 +506,7 @@ persistence = "save-all"   # default
 
 **メモリ（Memories）:**
 
-セッションを跨いで内容を持ち越す Memories は、機能ゲート（`features.memories`）が既定で無効です。ただし**有効にした時点で、内側の利用・生成はどちらも既定でオン**になります。つまり「使う／使わない」は一度の判断で決まり、細かい調整はその後です。有効にすると、履歴とは別の残留面が増えます。
+セッションを跨いで内容を持ち越す Memories は、機能ゲート（`features.memories`）がデフォルトで無効です。ただし**有効にした時点で、内側の利用・生成はどちらもデフォルトでオン**になります。つまり「使う／使わない」は一度の判断で決まり、細かい調整はその後です。有効にすると、履歴とは別の残留面が増えます。
 
 ```toml
 # ~/.codex/config.toml
@@ -490,6 +527,19 @@ Codex CLI は、公式ドキュメントで目立つ扱いではないものの�
 - `~/.codex/sessions/` 以下に JSONL 形式で自動保存される
 - `history.persistence` とは独立した仕組みで、セッション全体（ツール実行結果を含む）が記録される
 - 振り返りやデバッグに有用
+- **止める設定はありません。** 対話 CLI の `config.toml` には、この保存を無効にするキーも、容量上限も、期間による自動削除もありません（0.146.0 で確認）。7 日を過ぎたものは `.jsonl.zst` に圧縮されますが、圧縮は削除ではありません
+
+つまり `[history] persistence = "none"` にしても、作業内容そのものは残り続けます。機密性を優先する場面では、次のどちらかで対処してください。
+
+```bash
+# 非対話で済む作業は、そもそも保存させない
+codex exec --ephemeral "..."
+
+# 対話で作業したあとは、そのセッションを削除する
+codex delete <セッション ID>
+```
+
+`codex archive` は `archived_sessions/` へ移すだけで、削除ではありません。機微な作業を続ける端末では、`sessions/` と `archived_sessions/` を定期的に棚卸ししてください。
 
 **OpenTelemetry 統合:**
 
@@ -520,6 +570,28 @@ protocol = "binary"        # 必須。"binary" または "json"
 - `~/.codex/log/` にファイルログが書き出される
 - `config.toml` の `log_dir` で変更可能
 
+**利用データの送信:**
+
+`[otel]` を自分で設定しなくても、利用メトリクスは OpenAI 側の収集先へ送られます。`analytics.enabled` は書かなければ有効として扱われ、メトリクスはログインしていなくても送信されます（0.146.0 の release ビルドで確認）。操作イベントの送信はログイン状態と認証方式によります。止めるなら次の 1 行です。
+
+```toml
+# ~/.codex/config.toml
+[analytics]
+enabled = false
+```
+
+メトリクス側もこの行に連動して止まります。将来その連動が変わっても閉じたままにしたい場合は、`[otel] metrics_exporter = "none"` も併記してください。
+
+**`$CODEX_HOME` はまるごと機密ディレクトリです:**
+
+ここまで見てきたとおり、`~/.codex` には資格情報、入力履歴、セッション全文、シェル環境のスナップショット、永続化した許可ルールが集まります。Codex はこれらのファイルを必ず厳しい権限で作るわけではなく（`auth.json` は 0600 ですが、セッションやスナップショットは作成時の umask 任せです）、ディレクトリ自体の権限も検査しません。入れ物の側で守るのが確実です。
+
+```bash
+chmod 700 ~/.codex
+```
+
+Unix 系での一般的な目安です。運用形態によって適否は変わるので、共有ホストでは所有者と権限を併せて確認してください。
+
 ### 9. 設定が効いているか確かめる
 
 設定は、書いただけでは信用できません。一度、効いているかを確かめてください。
@@ -541,6 +613,14 @@ profile を切り替えて確かめるなら `--profile <名前>`、beta の権�
 
 ただし、このコマンドで確かめられる範囲には限りがあります。`codex sandbox` が適用するのはファイルシステムとネットワークのサンドボックスまでで、`shell_environment_policy` は適用されません。`MY_API_KEY` を export した状態で `codex sandbox -- env` を実行すると、その値はそのまま表示されます。環境変数の除外が効いているかは、この方法では確かめられません。
 
+**設定キーそのものが有効かどうかも、別に確かめてください。** 綴りを間違えたキーや、その版に存在しないキーは、通常の起動では警告なく無視されます。書いたつもりの設定が一つも効いていなくても、Codex は普通に動きます。
+
+```bash
+codex exec --strict-config --skip-git-repo-check "ok"
+```
+
+`--strict-config` を付けると、`config.toml` 全体がスキーマと照合され、知らないキーがあればその場で行番号つきのエラーになります。版を上げたあとや、この文書を読ませて設定を書かせたあとに、一度通しておくと確実です。
+
 ## 導入の仕方
 
 ### Quick Start
@@ -554,26 +634,31 @@ profile を切り替えて確かめるなら `--profile <名前>`、beta の権�
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 allow_login_shell = false
-web_search = "cached"          # 既定。索引済みの結果を返すので live より露出が小さい
+web_search = "cached"          # 索引済みの結果を返すので live より露出が小さい
 
 # 資格情報はファイル（平文の auth.json）ではなく OS キーチェーンへ
+# 書いただけでは移行しません。再ログインまで済ませてください（§5）
 # API キーは絶対にこのファイルに書かない（§5 を参照）
 cli_auth_credentials_store = "keyring"
 mcp_oauth_credentials_store = "keyring"
 
 # モデル名はここで固定しない方が無難です。世代が上がるたびに古くなります
 
+[analytics]
+enabled = false                # 書かないと利用メトリクスが送信されます（§8）
+
 [history]
-persistence = "save-all"
+persistence = "save-all"       # 機微な作業では "none"。ただしセッション全文は別に残ります（§8）
 
 [sandbox_workspace_write]
-network_access = false         # 既定値。Web 検索は止まらない。npm / git で承認を挟む
+network_access = false         # Web 検索は止まらない。npm / git で承認を挟む
 exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
 writable_roots = []            # 追加の書き込み先を増やさない
 
 [shell_environment_policy]
-inherit = "core"               # KEY / SECRET / TOKEN を含む変数は既定で除外される
+inherit = "core"               # デフォルトは all（全部渡す）
+ignore_default_excludes = false  # デフォルトは true（＝名前による除外なし）
 ```
 
 **profile は 1 つにつき 1 ファイルです**（詳しくは「日常の使い分け」）。切り替え用に次を置いておきます。
@@ -615,8 +700,11 @@ exclude_tmpdir_env_var = true
 writable_roots = []
 
 [history]
+# 入力履歴（history.jsonl）だけを止めます。セッション全文は sessions/ に残ります
 persistence = "none"
 ```
+
+**この profile の限界:** ネットワークと入力履歴は閉じますが、セッション全文の保存までは止まりません。「端末に何も残らない profile」ではないので、機微な作業を終えたら `codex delete <セッション ID>` で当該セッションを削除し、`sessions/` と `archived_sessions/` の残りを確認してください。非対話で済む作業なら `codex exec --ephemeral` を選ぶほうが確実です（§8）。
 
 この構成の要は 2 点です。書き込みがワークスペース内に限られること。外に出る操作で人間に来ること。中では自動で進み、外に出るとき——ファイルでもネットワークでも——に判断が挟まります。普段は静かで、来た時には読む価値がある。狙っているのはその塩梅です。
 
@@ -630,14 +718,15 @@ persistence = "none"
 
 | 締めたいもの | 設定 | 代償 |
 |---|---|---|
-| 外部への持ち出しを完全に断つ | `network_access = false` ＋ `approval_policy = "never"` | 承認による例外も効かなくなる。npm / git は失敗する |
+| サンドボックス内のコマンドの外向き通信を断つ | `network_access = false` ＋ `approval_policy = "never"` | 承認による例外も効かなくなる。npm / git は失敗する。Web 検索・MCP・hooks は別に締める必要がある |
 | 承認を出さずに行き先だけ絞る | ドメインルール（`features.network_proxy`） | experimental。設定量が増える |
 | 外部テキストの取り込み | `web_search = "indexed"` または `"disabled"` | 調査の質が落ちる |
 | ワークスペース内の操作も含めて止める | `approval_policy = "untrusted"` | 承認が頻発する。日常運用には重い |
 | 特定カテゴリの操作 | `approval_policy` を granular にして該当を `false` | 静かに失敗が増える。何を閉じたか記録が要る |
 | 破壊的コマンド | execpolicy の `forbidden` ルール | プレビュー機能。ルールの保守が要る |
-| 環境変数からの漏れ | `shell_environment_policy` の `include_only` で許可リスト化 | 通す変数を把握しておく必要がある |
-| 履歴の残留 | `persistence = "none"` | 継続作業がしづらくなる |
+| 環境変数からの漏れ | `inherit = "core"` ＋ `allow_login_shell = false`。継承を広く保つなら `filters` で許可リスト化 | 通す変数を把握しておく必要がある。login shell の PATH やエイリアスに頼れなくなる |
+| 入力履歴の残留 | `persistence = "none"` | 継続作業がしづらくなる。セッション全文は残る |
+| セッション全文の残留 | 非対話は `codex exec --ephemeral`、対話は作業後に `codex delete <ID>` | `codex resume` で再開できなくなる。設定では止められないので運用が要る |
 | メモリの残留 | `use_memories = false` / `generate_memories = false` | セッションを跨ぐ利点が消える |
 | MCP 経由の操作 | `enabled_tools` で許可リスト化 | サーバ更新のたびに見直しが要る |
 | 組織全体で強制 | `requirements.toml` | 配布と維持の運用が要る |
@@ -659,7 +748,7 @@ codex --profile offline_strict
 
 ### 日常の使い分け
 
-profile は **1 つにつき 1 ファイル**です。`$CODEX_HOME/<名前>.config.toml`（既定では `~/.codex/<名前>.config.toml`）を置き、`--profile <名前>` で選びます。ベースの `config.toml` の上に、そのファイルが重なります。
+profile は **1 つにつき 1 ファイル**です。`$CODEX_HOME/<名前>.config.toml`（デフォルトでは `~/.codex/<名前>.config.toml`）を置き、`--profile <名前>` で選びます。ベースの `config.toml` の上に、そのファイルが重なります。
 
 profile ファイルは**設定ファイルそのもの**なので、`[sandbox_workspace_write]` や `[history]` を含め、`config.toml` に書けるものはひととおり書けます。ネットワークや履歴を profile 単位で切り替えられるのはこのためです。
 
@@ -673,7 +762,7 @@ codex --profile local_write
 # ネットワークが必要な時だけ
 codex --profile remote_enabled
 
-# 機微な作業。ネットワークも履歴も閉じる
+# 機微な作業。ネットワークと入力履歴を閉じる（セッション全文は別途削除が要る）
 codex --profile offline_strict
 ```
 
@@ -728,7 +817,7 @@ Codex には、`sandbox_mode` / `[sandbox_workspace_write]` とは別系統の�
 >
 > この食い違いは上流に報告済みです（[openai/codex#36448](https://github.com/openai/codex/issues/36448)）。コードとドキュメントのどちらが意図された挙動かは、そちらの回答待ちです。
 
-このチートシートがここまで説明してきた設定は今も現役の既定路線です。ただし「beta に触れなければ関係ない」とは言い切れません。上のとおり、消し忘れた 1 行が既定路線を静かに上書きします。
+このチートシートがここまで説明してきた設定は、今も現役の本流です。ただし「beta に触れなければ関係ない」とは言い切れません。上のとおり、消し忘れた 1 行がその本流を静かに上書きします。
 
 組み込みプロファイルは `:read-only` / `:workspace` / `:danger-full-access` の 3 つ。独自に定義するときは `[permissions.<名前>]` を書きます。
 
@@ -748,7 +837,7 @@ enabled = true
 "registry.npmjs.org" = "allow"
 ```
 
-- `domains` は **allow エントリが 1 つも無ければ全ドメインが拒否**され、`deny` は `allow` に優先します。既定拒否から始まるので、許可リストとして素直に書けます
+- `domains` は **allow エントリが 1 つも無ければ全ドメインが拒否**され、`deny` は `allow` に優先します。何も書かなければ拒否から始まるので、許可リストとして素直に書けます
 - ファイルシステム側はパスごとに `read` / `write` / `deny` を指定します
 - `extends` で他のプロファイルを継承できます
 - `dangerously_allow_non_loopback_proxy` / `dangerously_allow_all_unix_sockets` は名前のとおりの抜け道です。通常の開発では触らないでください

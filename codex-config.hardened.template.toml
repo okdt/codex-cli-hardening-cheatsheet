@@ -5,7 +5,7 @@
 # closed. Note that closing web search removes ordinary research; leave it at
 # the default "cached" unless the work must not read anything external.
 # min_safe 版と同じ姿勢に、Web 検索の遮断を加えたもの。ただし Web 検索を閉じると
-# 通常の調べ物ができなくなる。外部を一切読ませたくない作業でなければ、既定の
+# 通常の調べ物ができなくなる。外部を一切読ませたくない作業でなければ、デフォルトの
 # "cached" のままでよい。
 #
 # Design goals:
@@ -29,19 +29,38 @@ model_reasoning_effort = "medium"
 
 # Web search defaults to "cached", so external text reaches the model even with
 # the network closed. Open it only when you want research.
-# web_search の既定は "cached"。ネットワークを閉じても外部テキストは届くので、
+# web_search のデフォルトは "cached"。ネットワークを閉じても外部テキストは届くので、
 # 調べ物をさせたい時だけ開ける。
 web_search = "disabled"
 
 # Keep credentials in the OS keychain rather than a plaintext auth.json.
-# 資格情報は平文の auth.json ではなく OS キーチェーンに置く。
+# The CLI store defaults to "file"; MCP OAuth defaults to "auto".
+# These lines change where new credentials go; they do not migrate the old ones.
+# Log in again, confirm `codex login status`, then check auth.json is gone.
+# 資格情報は平文の auth.json ではなく OS キーチェーンに置く。CLI 側のデフォルトは
+# "file"。この行だけでは移行しないので、再ログインまで済ませて auth.json を確認する。
 cli_auth_credentials_store = "keyring"
 mcp_oauth_credentials_store = "keyring"
 
-# Persist local session history for day-to-day usability.
-# 日常利用のため、ローカルのセッション履歴は保存する。
+# Usage metrics are sent unless this is set, even when logged out.
+# 書かないと利用メトリクスが送信される（未ログインでも送られる）。
+[analytics]
+enabled = false
+
+[otel]
+# Keep this closed too, in case the link between analytics and metrics changes.
+# analytics との連動が将来変わっても閉じたままにするため、こちらも指定する。
+metrics_exporter = "none"
+
+# Persist local input history for day-to-day usability.
+# 日常利用のため、ローカルの入力履歴は保存する。
 # If you prefer not to retain history, change this to "none".
 # 履歴を残したくない場合は、ここを "none" に変更する。
+# NOTE: this only controls history.jsonl. Full session transcripts go to
+# $CODEX_HOME/sessions/ and cannot be turned off in config. Use
+# `codex exec --ephemeral`, or `codex delete <ID>` after sensitive work.
+# 注意: これは history.jsonl だけの設定。セッション全文は sessions/ に残り、
+# 設定では止められない。作業後に codex delete するか、--ephemeral を使う。
 [history]
 persistence = "save-all"
 
@@ -54,10 +73,34 @@ exclude_tmpdir_env_var = true
 writable_roots = []
 
 # Limit what of your environment is inherited by spawned commands.
-# Variables containing KEY / SECRET / TOKEN are excluded by default.
-# 子プロセスへ引き継ぐ環境変数を絞る。KEY / SECRET / TOKEN を含む変数は既定で除外される。
+# The defaults are NOT safe: inherit defaults to "all", and
+# ignore_default_excludes defaults to true (no name-based filtering at all).
+# The name filter only covers *KEY* / *SECRET* / *TOKEN*; PGPASSWORD and
+# DATABASE_URL pass through. Treat it as a fallback, not the main protection.
+# 子プロセスへ引き継ぐ環境変数を絞る。デフォルトは全継承・除外なしで安全側ではない。
+# 名前による除外は *KEY* / *SECRET* / *TOKEN* の 3 パターンだけ。
 [shell_environment_policy]
 inherit = "core"
+ignore_default_excludes = false
+
+# Stop the shell snapshot from being written at all. A login shell would load a
+# snapshot of the full Codex environment that shell_environment_policy does not
+# filter; allow_login_shell = false already blocks that path, and this also stops
+# the plaintext snapshot file under $CODEX_HOME/shell_snapshots/.
+# Key confirmed present on 0.146.0. Cost: shell functions, aliases and PATH from
+# your login shell are no longer carried into commands.
+# snapshot ファイルの生成自体を止める。0.146.0 で存在を確認したキー。
+# 代償として、login shell の関数・エイリアス・PATH が引き継がれなくなる。
+[features]
+shell_snapshot = false
+
+# Close the memories surface even though its feature gate is off today,
+# so a future default-on change does not open it silently.
+# memories は今はゲートが無効だが、将来デフォルトで有効になっても開かないようにする。
+[memories]
+use_memories = false
+generate_memories = false
+disable_on_external_context = true
 
 # Profiles are one file each: $CODEX_HOME/<name>.config.toml, selected with
 # `codex --profile <name>` and layered over this file. Because a profile file is
@@ -97,4 +140,15 @@ inherit = "core"
 # - beta の権限プロファイルは sandbox_mode 系と併用できない。どちらか一方を選ぶ。
 #   0.146.0 で確認: 併記すると default_permissions 側が勝ち、上の sandbox_mode を
 #   警告なく上書きする。beta を試したら消し忘れないこと。
-# - beta の権限プロファイルは sandbox_mode 系と併用できない。どちらか一方を選ぶ。
+# - Do not export secrets into the shell you start Codex from. hooks and notify
+#   run outside shell_environment_policy and inherit the Codex environment.
+# - Codex を起動するシェルにシークレットを export しない。hooks と notify は
+#   shell_environment_policy の外で Codex の環境をそのまま受け取る。
+# - Treat $CODEX_HOME as a secrets directory: `chmod 700 ~/.codex`. Sessions and
+#   shell snapshots are not created with a fixed restrictive mode.
+# - $CODEX_HOME はまるごと機密ディレクトリとして扱う（chmod 700 ~/.codex）。
+#   セッションやスナップショットは固定の厳しい権限では作られない。
+# - Marking a repository as trusted hands it config precedence: a trusted
+#   project's .codex/config.toml can override the settings in this file.
+# - リポジトリを trusted にすると設定の優先権を渡すことになる。trusted な
+#   プロジェクトの .codex/config.toml はこのファイルの設定を上書きできる。
