@@ -11,6 +11,8 @@ It has two main goals:
 
 This is not official OpenAI documentation. Before applying any settings in production, verify them against the Codex CLI version you are actually using and the latest official references.
 
+**Current release: v1.3 (2026-08-03). Verified against Codex CLI 0.146.0.** See [CHANGELOG.md](./CHANGELOG.md) for what changed.
+
 ## Included Files
 
 - [Codex_CLI_Hardening_Cheat_Sheet.ja.md](./Codex_CLI_Hardening_Cheat_Sheet.ja.md)
@@ -65,7 +67,7 @@ It is not mainly about:
 - It also covers secure design principles such as human-in-the-loop, least privilege, and defense in depth
 - The shared templates prioritize clarity and operational simplicity first
 - Fine-grained approval setups should usually come after the team has a concrete need for them
-- Config keys and behavior change across Codex CLI versions. The current text was verified against **Codex CLI 0.146.0 as of 2026-08-01**, using both the official documentation and the running binary; where the two disagree, the text says so
+- Config keys and behavior change across Codex CLI versions. The current text was verified against **Codex CLI 0.146.0 as of 2026-08-03**, using the published source and the running binary. Agreement with the official documentation was not used as the standard; where the implementation and the documentation disagree, the text says so
 
 ## References
 

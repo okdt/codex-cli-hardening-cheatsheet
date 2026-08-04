@@ -13,6 +13,8 @@ English: [README.en.md](./README.en.md)
 
 これは OpenAI 公式ドキュメントではありません。実運用前に、利用中の Codex CLI バージョンと公式情報を必ず確認してください。
 
+**現在の版: v1.3（2026-08-03）／検証対象: Codex CLI 0.146.0。** 変更点は [CHANGELOG.md](./CHANGELOG.md) にあります。
+
 ## Included Files
 
 - [Codex_CLI_Hardening_Cheat_Sheet.ja.md](./Codex_CLI_Hardening_Cheat_Sheet.ja.md)
@@ -71,7 +73,7 @@ English: [README.en.md](./README.en.md)
 - また、`Human-In-The-Loop`、最小権限の原則、多層防御といったセキュア設計の基本原則もあわせて解説しています
 - 共通テンプレートは、まず単純で説明しやすいことを優先しています
 - `granular` のような細分化設定は、運用要件が固まってから追加する方が安全です
-- 設定キーや挙動は Codex CLI のバージョンによって変わります。本文は **Codex CLI 0.146.0（2026-08-01 時点）**の公式ドキュメントと実機の双方で確認しています。両者が食い違う箇所は本文に明記しました
+- 設定キーや挙動は Codex CLI のバージョンによって変わります。本文は **Codex CLI 0.146.0（2026-08-03 時点）** で確認しました。公開ソースと実機の挙動を根拠にしており、公式ドキュメントとの一致は根拠にしていません。実装と食い違う箇所は本文に明記しました
 
 ## References
 

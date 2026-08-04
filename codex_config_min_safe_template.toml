@@ -116,7 +116,10 @@ ignore_default_excludes = false
 #   run outside shell_environment_policy and inherit the Codex environment.
 # - Treat $CODEX_HOME as a secrets directory: `chmod 700 ~/.codex`. Sessions and
 #   shell snapshots are not created with a fixed restrictive mode.
-# - Verify the result: `codex sandbox --log-denials -- <command>` (macOS).
+# - Validate the keys with `codex exec --ephemeral --strict-config --skip-git-repo-check "ok"`.
+#   An unknown or misspelled key is otherwise ignored without a warning. Note that
+#   `codex sandbox` does NOT reflect sandbox_mode or network_access, so a refusal
+#   there is not confirmation that those settings are in effect.
 # - The beta permission profiles (default_permissions / [permissions.*]) do NOT
 #   combine with sandbox_mode / [sandbox_workspace_write]. Pick one model.
 #   Verified on 0.146.0: if both are present, default_permissions WINS. A leftover

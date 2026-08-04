@@ -133,8 +133,14 @@ disable_on_external_context = true
 #   and inject the value at launch from a keychain or secret manager.
 # - この設定ファイルにシークレットの値を書かない。環境変数名だけを書き、
 #   値はキーチェーンやシークレットマネージャから起動時に注入する。
-# - Verify with `codex sandbox --log-denials -- <command>` (macOS).
-# - 効いているかは `codex sandbox --log-denials -- <コマンド>` で確かめる（macOS）。
+# - Validate the keys with `codex exec --ephemeral --strict-config --skip-git-repo-check "ok"`.
+#   An unknown or misspelled key is otherwise ignored without a warning.
+#   Note that `codex sandbox` does NOT reflect sandbox_mode or network_access, so a
+#   refusal there is not confirmation that these settings are in effect.
+# - キーが有効かは `codex exec --ephemeral --strict-config --skip-git-repo-check "ok"` で確かめる。
+#   綴り違いや存在しないキーは、通常の起動では警告なく無視される。
+#   `codex sandbox` は sandbox_mode や network_access を反映しないので、そこで拒否されても
+#   これらの設定が効いている証拠にはならない。
 # - The beta permission profiles (default_permissions / [permissions.*]) do not
 #   combine with sandbox_mode / [sandbox_workspace_write]. Pick one model.
 #   Verified on 0.146.0: when both appear, default_permissions WINS and silently
