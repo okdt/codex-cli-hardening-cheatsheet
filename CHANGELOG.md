@@ -6,11 +6,11 @@
 
 ### Web 検索の推奨を変更
 
-- **開発でコードを触らせるなら `web_search = "indexed"` を勧めます。** 既定の `cached` はライブ取得をしないため調べ物の途中で行き止まりに当たり、作業中に `live` へ緩めることになります。Quick Start と `codex_config_min_safe_template.toml` も `indexed` に合わせました
+- **開発でコードを触らせるなら `web_search = "indexed"` を勧めます。** デフォルトの `cached` はライブ取得をしないため調べ物の途中で行き止まりに当たり、作業中に `live` へ緩めることになります。Quick Start と `codex_config_min_safe_template.toml` も `indexed` に合わせました
 - **`cached` はインジェクション対策ではありません。** ライブページを取りに行かないだけで、検索結果に仕込まれたテキストは索引経由でそのまま届きます。索引は検査ではありません
 - **`indexed` は取得先を索引済み URL に限ります。** 内部の情報をパラメータに載せて外へ持ち出す形を妨げますが、塞ぎ切る設定ではありません。照合しているのは OpenAI 側で、パス・フラグメント・符号化・リダイレクトは未検証です。MCP・hooks・承認を通ったコマンドは、この設定の管轄外です
 - 締める表から `indexed` を落としました。`cached` から `indexed` へ動かすのは締める操作ではありません
-- **`network_access = false` と `web_search = "cached"` はどちらも既定です。** 両方とも触っていない状態では、自分で取りに行く経路がありません。索引の更新の速さは公開されていないので、返ってきたものがどれだけ新しいかを見積もる手立てもありません
+- **`network_access = false` と `web_search = "cached"` はどちらもデフォルトです。** 両方とも触っていない状態では、自分で取りに行く経路がありません。索引の更新の速さは公開されていないので、返ってきたものがどれだけ新しいかを見積もる手立てもありません
 
 ### デフォルト値の記述を訂正
 
@@ -29,9 +29,15 @@
 ### 追加した節
 
 - 承認ダイアログで永続化を選ぶと、コマンドの許可ルールとネットワークルールが同じ `rules/default.rules` に追記される点。監査プロンプトにも前後の差分確認を入れました
-- `analytics.enabled` は書かなければ有効として扱われ、利用メトリクスは未ログインでも送信されます
+- `analytics.enabled` は書かなければ有効として扱われ、メトリクスの送信先には認証状態を参照する経路がありません
 - `$CODEX_HOME` をまるごと機密ディレクトリとして扱う節。セッションやスナップショットは固定の厳しい権限では作られません
-- 設定が効いているかを確かめる節。`codex exec --strict-config` を使わないと、知らないキーは警告なく無視されます
+- 設定が効いているかを確かめる節。`codex exec --strict-config` を使わないと、知らないキーは警告なく無視されます。この確認自体がセッション記録を残さないよう `--ephemeral` を併せています
+
+### 検証方法の訂正
+
+- **`codex sandbox` は `sandbox_mode` や `network_access` を反映しません。** `workspace-write` かつ `network_access = true` を書いた設定でも、書き込みと外向き通信のどちらも拒否されました。同じ操作はサンドボックスを通さなければ成功します。設定が何であれ拒否されるので、ここで拒否されたことを「設定が効いている」と読むことはできません。反映されるのは `-P` で権限プロファイルを指定したときで、`-P :workspace` なら書き込みが通り、`-P :read-only` では拒否されます
+- 「`network_access = false` が効いているかを `codex sandbox` で確かめる」という従来の案内を差し替えました
+- 表とコード内コメントに残っていた「完全遮断」「外部を一切読ませない」「外に出さない」を、実際に閉じる範囲へ限定しました
 - 監査プロンプトを日英で同梱しました（`Codex_CLI_Hardening_Audit_Prompt.{ja,en}.md`）
 
 ### リポジトリの扱い
@@ -62,7 +68,7 @@ Codex CLI 0.146.0 に合わせた改訂。記述は公式ドキュメントと�
 ### 扱う範囲を拡張
 
 - **シークレットと認証情報**を独立した軸に。OS キーチェーン、環境変数経由の受け渡し、`shell_environment_policy`
-- Web 検索の 4 段階（既定は `cached`）
+- Web 検索の 4 段階（デフォルトは `cached`）
 - MCP サーバのツール許可リストと承認
 - Memories による情報の残留
 - ドメイン単位のネットワーク制限（experimental）。承認を発生させずに行き先を絞れます
@@ -108,9 +114,15 @@ A revision checked against the published source (tag `rust-v0.146.0`) and the ru
 ### Added sections
 
 - The allow rules an approval dialog can append to `rules/default.rules`, covering both commands and network rules; the audit prompt now asks for a before-and-after diff
-- `analytics.enabled` is treated as enabled when absent, and usage metrics are sent even when logged out
+- `analytics.enabled` is treated as enabled when absent, and the metrics destination has no path that consults your login state
 - A section on treating `$CODEX_HOME` as one confidential directory; sessions and snapshots are not created with a fixed restrictive mode
-- A section on verifying that settings took effect, including `codex exec --strict-config`, since an unknown key is otherwise ignored without warning
+- A section on verifying that settings took effect, including `codex exec --strict-config`, since an unknown key is otherwise ignored without warning. `--ephemeral` is paired with it so the check itself leaves no session record
+
+### Corrected the verification method
+
+- **`codex sandbox` does not reflect `sandbox_mode` or `network_access`.** With a configuration setting `workspace-write` and `network_access = true`, both a write and an outbound request were still refused; the same operations succeed outside it. Because it refuses whatever the configuration says, a refusal there cannot be read as confirmation. What it does reflect is a permission profile passed with `-P`: `:workspace` let a write through, `:read-only` refused it.
+- The former advice, to confirm `network_access = false` with `codex sandbox`, was replaced.
+- Absolute phrasing left in tables and code comments — "nothing gets through", "nothing external read at all", "nothing goes out" — was narrowed to what each setting actually closes.
 - The hardening audit prompt is now shipped in both languages (`Codex_CLI_Hardening_Audit_Prompt.{ja,en}.md`)
 
 ### Repository handling

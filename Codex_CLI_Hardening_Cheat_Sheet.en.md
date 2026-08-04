@@ -330,7 +330,7 @@ Domain rules narrow down an already-open network. They are not a substitute for 
 | Setup | Prompts | Blocking |
 |---|---|---|
 | `false` + `on-request` (**this cheatsheet's default**) | on each npm / git | approval lets it through |
-| `false` + `never` | none | nothing gets through |
+| `false` + `never` | none | sandboxed commands get nothing through |
 | `true` + domain rules | none | only allowed destinations |
 
 Remember that this is experimental and off by default. Where stability matters, run `false` + `on-request` first.
@@ -381,17 +381,17 @@ Pick `live` when you know you need something the index does not have. That is a 
 
 | Posture | Setting | What it buys |
 |---|---|---|
-| Development work on code | `indexed` | Research works; data cannot leave as a parameter on a fetched URL |
+| Development work on code | `indexed` | Research works; the usual exfiltration, assembling an arbitrary new URL, is obstructed |
 | Something the index does not have | `live` | Removing the constraint, knowingly |
 | Search, but no fetching pages from sites | `cached` | Exfiltration is the concern; ingestion is handled by other means |
-| Nothing external read at all | `disabled` | No tool definition is built; the only step enforced locally |
+| Nothing read from web search | `disabled` | No tool definition is built; the only step enforced locally. MCP and hooks need closing separately |
 
 ```toml
 # ~/.codex/config.toml
 web_search = "indexed"     # for development; fetches limited to indexed URLs
 # web_search = "live"      # when you need what the index does not have
 # web_search = "cached"    # default; searches, but fetches no pages
-# web_search = "disabled"  # when nothing external should be read at all
+# web_search = "disabled"  # when web search should read nothing
 ```
 
 If pages you need keep failing to open, moving up to `live` is the call — record why when you do.
@@ -642,19 +642,28 @@ codex sandbox --log-denials -- curl -sS https://example.com
 
 Everything after `--` runs inside the sandbox. `--log-denials` (macOS) captures sandbox denials while the command runs and prints them afterwards.
 
-Confirm the things you assumed: that `network_access = false` really blocks outbound traffic, that writes outside `writable_roots` really fail. **The most common hardening failure is not a wrong setting but a setting someone believed was applied.**
+**This command does not reflect your `sandbox_mode` or `network_access`, though.** Checked on 0.146.0: with a configuration setting `sandbox_mode = "workspace-write"` and `network_access = true`, `codex sandbox -- <command>` still refused both a write and an outbound request. The same operations succeed when they are not run through it. Because it refuses **whatever your configuration says**, a refusal here cannot be read as confirmation that your settings are in effect.
 
-Add `--profile <name>` to test a specific profile, or `-P` / `--permission-profile <name>` for a beta permission profile.
+What it does reflect is a permission profile, passed with `-P` / `--permission-profile <name>` (the beta model, see "The New Permission Profiles"). `-P :workspace` let a write through; `-P :read-only` refused it. Passing `-P` also makes the working directory (`-C`) required.
 
-**Know what this command does not cover.** `codex sandbox` applies the filesystem and network sandbox only; it does not apply `shell_environment_policy`. Export `MY_API_KEY` and run `codex sandbox -- env` and the value is printed in full. Whether your environment-variable exclusions work cannot be checked this way.
+```bash
+# Try out how a permission profile behaves
+codex sandbox -P :workspace -C /path/to/workspace -- sh -c 'echo test > probe.txt'
+```
+
+**So `sandbox_mode` and `[sandbox_workspace_write]` cannot be confirmed this way.** What you can exercise here is the permission-profile side. **The most common hardening failure is a setting someone believed was applied — and one form of it is a check that never looked at the setting.**
+
+**Know what else this command does not cover.** `codex sandbox` applies the filesystem and network sandbox only; it does not apply `shell_environment_policy`. Export `MY_API_KEY` and run `codex sandbox -- env` and the value is printed in full. Whether your environment-variable exclusions work cannot be checked this way.
 
 **Check that the keys themselves are valid, too.** A misspelled key, or one that does not exist in your version, is ignored without a warning on a normal start. Codex runs perfectly well with none of your intended settings in effect.
 
 ```bash
-codex exec --strict-config --skip-git-repo-check "ok"
+codex exec --ephemeral --strict-config --skip-git-repo-check "ok"
 ```
 
 With `--strict-config` the whole `config.toml` is validated against the schema, and an unknown key fails immediately with the line number. Worth running after an upgrade, and after letting an agent write settings from this document.
+
+`--ephemeral` is there so that **the check itself leaves no session record** (§8). Validation works the same with it.
 
 ## How To Roll This Out
 
@@ -721,7 +730,7 @@ writable_roots = []
 ```
 
 ```toml
-# ~/.codex/offline_strict.config.toml — sensitive work; nothing goes out
+# ~/.codex/offline_strict.config.toml — sensitive work; narrows the ways out
 approval_policy = "untrusted"
 sandbox_mode = "workspace-write"
 web_search = "disabled"
